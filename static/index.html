@@ -1,0 +1,86 @@
+<!DOCTYPE html>
+<html ng-app="betApp">
+<head>
+    <meta charset="utf-8">
+    <meta http-equiv="X-UA-Compatible" content="IE=edge,chrome=1">
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+
+    <title>Euro XX XXI</title>
+    <link rel="shortcut icon" href="static/favicon.ico" type="image/x-icon">
+
+
+<link rel="stylesheet" href="https://unpkg.com/spectre.css/dist/spectre.min.css">
+<link rel="stylesheet" href="https://unpkg.com/spectre.css/dist/spectre-exp.min.css">
+<link rel="stylesheet" href="https://unpkg.com/spectre.css/dist/spectre-icons.min.css">
+
+    <style type="text/css">
+        body{
+            padding-top: 60px;
+        }
+    </style>
+
+</head>
+<body >
+<div id="app">
+  <p>
+    <!-- use router-link component for navigation. -->
+    <!-- specify the link by passing the `to` prop. -->
+    <!-- `<router-link>` will be rendered as an `<a>` tag by default -->
+    <!--
+    router-link to="/foo">Go to Foo</router-link>
+    <router-link to="/bar">Go to Bar</router-link
+    -->
+  </p>
+  <!-- route outlet -->
+  <!-- component matched by the route will render here -->
+  <!--router-view></router-view-->
+
+  <div v-show="!isConnected" class="container-fluid">
+
+    <br/>
+            
+    <div class="columns col-gapless">
+
+         <div class="column col-xs-12">
+            <center>
+                <a href="/signin">
+                    <img class="bg-primary text-light docs-shape s-circle centered" src="/static/img/login.jpg" alt="">
+                    <h2>Log in !</h2>
+                </a>
+            </center>
+        </div>
+        <div class="column col-xs-12">
+            <center>
+                <a href="/signon">
+                    <img class="bg-primary text-light docs-shape s-circle centered" src="/static/img/signon.jpg" alt="">
+                    <h2>Sign Up !</h2>
+                </a>
+            </center>
+          
+        </div>
+    </div>
+</div>
+
+
+<!--table class="table">
+  <thead>
+    <tr>
+      <th>label</th>
+      <th>cost</th>
+    </tr>
+  </thead>
+  <tbody>
+    <tr class="active" v-for="item in todos">
+      <td>{{ item.label }}</td>
+      <td>{{ item.cost }}</td>
+    </tr>
+  </tbody>
+</table-->
+</div>
+
+ <script src="https://cdn.jsdelivr.net/npm/vue/dist/vue.js"></script>
+ <script src="https://unpkg.com/vue-router/dist/vue-router.js"></script>
+ <script src="static/app.js"></script> 
+
+</body>
+</html>
