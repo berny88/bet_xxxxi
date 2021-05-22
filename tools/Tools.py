@@ -21,7 +21,7 @@ class DbManager:
     def __init__(self):
         self.DATE_FORMAT = '%Y-%m-%dT%H:%M:%S UTC'
         #print("avant client mongo")
-        uri = "mongodb://berny_bet:Ponpon01@mongodb-berny.alwaysdata.net:27017/?authSource=berny_bet&authMechanism=SCRAM-SHA-1"
+        #uri = "mongodb://berny_bet:Ponpon01@mongodb-berny.alwaysdata.net:27017/?authSource=berny_bet&authMechanism=SCRAM-SHA-1"
 
         client = MongoClient(uri)
         #print(client)
@@ -50,7 +50,7 @@ class DbManager:
     def getDb(self):
         """ get Mongo DB access """
         if (self.db is None):
-            uri = "mongodb://berny_bet:Ponpon01@mongodb-berny.alwaysdata.net:27017/?authSource=berny_bet&authMechanism=SCRAM-SHA-1"
+            #uri = "mongodb://berny_bet:Ponpon01@mongodb-berny.alwaysdata.net:27017/?authSource=berny_bet&authMechanism=SCRAM-SHA-1"
 
             client = MongoClient(uri)
             logger.info(u'getDb::conn={}'.format("mongodb+srv://phipha:phiphaxxxviii@phiphaxxxviii-cs6ex.mongodb.net"))
