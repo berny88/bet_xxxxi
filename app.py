@@ -6,25 +6,24 @@ import logging.handlers
 
 from flask import Flask
 print(sys.path)
-from tools.Tools import ToolManager, tools_page
-from users.UserServices import users_page
+from front.front import front_end
 
 
-application = Flask(__name__)
+application = Flask(__name__, static_url_path='', static_folder="")
 application.secret_key = u'A0Zr98j/3yX R~XHH!jmN]LWX/,?RT#BB'
 
-application.register_blueprint(users_page, url_prefix="/users", template_folder='templates')
+application.register_blueprint(front_end, url_prefix="/front", template_folder='templates')
 
 print(sys.path)
 
 application.logger.warning('Started')
-#ch = logging.StreamHandler(sys.stdout)
-#ch.setLevel(logging.DEBUG)
+ch = logging.StreamHandler(sys.stdout)
+ch.setLevel(logging.DEBUG)
 logging.basicConfig(filename='bet.log',level=logging.DEBUG, format='%(asctime)s:%(levelname)s:%(message)s')
 log_formatter = logging.Formatter('%(asctime)s %(levelname)s %(funcName)s(%(lineno)d) %(message)s')
 
 logger = logging.getLogger(__name__)
-#logger.addHandler(ch)
+logger.addHandler(ch)
 
 
 logger.info('Started')
@@ -50,6 +49,8 @@ def add_header(response):
 
 @application.route("/")
 def hello_world():
+    logger.info("application.static_folder={}".format(str(application.static_folder)))
+    logger.info("before lauch index")
     return application.send_static_file('index.html')
 
 @application.route('/yeah')
@@ -63,8 +64,8 @@ def yeah():
 
 @application.errorhandler(404)
 def ma_page_404(error):
-	return u"Page not found !<br/> <h1>404 error code !</h1> Where do you really want to go ?", 404
+	return u"Page not found !<br/> <h1>404 error code !</h1> <h1>Where do you really want to go ?</h1>", 404
 
 if __name__ == '__main__':
     print("main app.py application.run")
-    application.run(host='0.0.0.0', port=os.environ.get('OPENSHIFT_PYTHON_PORT', 8080))
+    application.run(host='0.0.0.0', port=os.environ.get('OPENSHIFT_PYTHON_PORT', 5000))

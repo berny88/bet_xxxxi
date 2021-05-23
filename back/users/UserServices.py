@@ -5,14 +5,13 @@ from uuid import uuid4
 #import sendgrid
 #from sendgrid.helpers.mail import *
 
-from tools.Tools import ToolManager
-from bson.binary import Binary
+from back.tools.Tools import ToolManager
 from flask import send_file
 import hashlib
 
 import io
 
-from tools.Tools import DbManager
+from back.tools.Tools import DbManager
 
 logger = logging.getLogger(__name__)
 
