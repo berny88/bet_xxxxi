@@ -1,4 +1,4 @@
-# bet-xxxxi-app
+# front
 
 ## Project setup
 ```
