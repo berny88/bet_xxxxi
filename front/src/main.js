@@ -6,5 +6,11 @@ Vue.config.productionTip = false
 
 new Vue({
   router,
+  data: {
+    email: "ponpon@ponpon.com",
+    thepwd:"thepassword",
+    errors:[{message:""}, 
+            {message:""}]
+  },
   render: h => h(App)
 }).$mount('#app')

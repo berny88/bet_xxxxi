@@ -4,7 +4,7 @@ npm run build
 
 echo "cd .."
 cd ..
-
+mkdir $TARGET
 echo "copy *.py"
 cp app.py $TARGET/.
 
