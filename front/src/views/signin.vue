@@ -1,12 +1,14 @@
 <template>
     <div class="container grid-xs">
         <h1><center>Connection</center></h1>
-        <!--p v-if="errors.length">
+        <!--div id="matchs-list">
+        <p v-if="errors.length">
           <b>Please correct the following error(s):</b>
           <ul>
             <li v-for="err in errors" :key="err.message">{{ err.message }}</li>
           </ul>
-        </p-->
+        </p>
+        </div-->
         <div class="form-group">
           <form name="thelogin" ng-submit="login()" required>
             <div class="form-group">

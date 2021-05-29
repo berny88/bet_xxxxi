@@ -4,6 +4,9 @@ import Home from '../views/Home.vue'
 import Sign from '../views/sign.vue'
 import Signin from '../views/signin.vue'
 import Signon from '../views/logon.vue'
+import Games from '../views/games/games.vue'
+import Ranking from '../views/games/ranking.vue'
+import Bets from '../views/games/bets.vue'
 
 Vue.use(VueRouter)
 
@@ -27,6 +30,21 @@ const routes = [
     path: '/signon',
     name: 'Signon',
     component: Signon
+  },
+  {
+    path: '/games',
+    name: 'Games',
+    component: Games
+  },
+  {
+    path: '/bets',
+    name: 'Bets',
+    component: Bets
+  },
+  {
+    path: '/ranking',
+    name: 'Ranking',
+    component: Ranking
   },
   {
     path: '/about',
