@@ -1,3 +1,10 @@
+// ./components/HomeLink.vue
+<script>
+export default {
+	name: 'Sign'
+}
+</script>
+
 <template>
   <div class="home">
        <div class="columns col-gapless">
