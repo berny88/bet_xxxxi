@@ -1,7 +1,6 @@
 <template>
   <div class="home">
        <div class="columns col-gapless">
-
          <div class="column col-xs-12">
             <center>
                 <router-link to="/signin">
