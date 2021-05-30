@@ -22,6 +22,34 @@
   </div>
 </template>
 
+<script>
+    export default {
+        name: 'App',
+        data() {
+            return {
+                authenticated: false,
+                mockAccount: {
+                    email: "nraboy",
+                    thepwd: "password"
+                }
+            }
+        },
+        mounted() {
+            if(!this.authenticated) {
+                this.$router.replace({ name: "Signin" });
+            }
+        },
+        methods: {
+            setAuthenticated(status) {
+                this.authenticated = status;
+            },
+            logout() {
+                this.authenticated = false;
+            }
+        }
+    }
+</script>
+
 <style>
   @import 'https://unpkg.com/spectre.css/dist/spectre.min.css';
   @import 'https://unpkg.com/spectre.css/dist/spectre-exp.min.css';

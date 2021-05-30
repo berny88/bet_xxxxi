@@ -13,3 +13,6 @@ mkdir $TARGET/back
 
 cp front/*.py $TARGET/front/.
 cp -rR back $TARGET/.
+
+echo launch python
+python ../dist/app.py
