@@ -2,7 +2,9 @@
 
 ## Project setup
 ```
-npm install
+cd front
+vue cli add
+npm install axios --save
 ```
 
 ### Compiles and hot-reloads for development

@@ -23,11 +23,11 @@ class DbManager:
         #print("avant client mongo")
         #uri = "mongodb://berny_bet:Ponpon01@mongodb-berny.alwaysdata.net:27017/?authSource=berny_bet&authMechanism=SCRAM-SHA-1"
 
-        client = MongoClient(uri)
+        #client = MongoClient(uri)
         #print(client)
-        logger.info(u'conn={}'.format("mongodb-berny.alwaysdata.net:27017/?authSource=berny_bet"))
-        self.db = client.berny_bet
-        logger.info(u'db={}'.format(self.db))
+        #logger.info(u'conn={}'.format("mongodb-berny.alwaysdata.net:27017/?authSource=berny_bet"))
+        #self.db = client.berny_bet
+        #logger.info(u'db={}'.format(self.db))
 
     def datetime_parser(self, dct):
         for k, v in dct.items():

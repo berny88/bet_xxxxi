@@ -28,7 +28,9 @@
 </template>
 
 <script>
-    export default {
+    import axios from "axios";
+
+   export default {
         name: 'Login',
         data() {
             return {
@@ -42,13 +44,18 @@
         methods: {
             login() {
                 if(this.input.email != "" && this.input.thepwd != "") {
-                    if(this.input.email == this.$parent.mockAccount.email && this.input.thepwd == this.$parent.mockAccount.thepwd) {
-                        this.$emit("authenticated", true);
-                        this.$router.replace({ name: "Bets" });
-                    } else {
-                        console.log("The email and / or password is incorrect");
-                        this.errormsg="The email and / or password is incorrect";
-                    }
+                    this.$emit("authenticated", true);
+                    var connect_attr={email:this.input.email, thepwd:this.input.thepwd};
+                        axios({ method: "POST", "url": "back/users/apiv1.0/login", 
+                        "data": {connect: connect_attr}, 
+                        "headers": { "content-type": "application/json" } }).then(result => {
+                    this.errormsg = result.data;
+                    this.$router.replace({ name: "Bets" });
+                    }, error => {
+                        console.error(error);
+                        this.errormsg=error;
+                    });
+                    
                 } else {
                     console.log("A email and password must be present");
                 }

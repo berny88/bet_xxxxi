@@ -405,24 +405,30 @@ class UserManager(DbManager):
 
     def authenticate(self, email, pwd):
         """ authenticate user and retrieve it if ok"""
-        localdb = self.getDb()
+        #localdb = self.getDb()
         logger.info(u'authenticate::email={}/pwd={}'.format(email, pwd))
 
-        usersColl = localdb.users
-        bsonUser = usersColl.find_one({"email": email})
-        logger.info(u'authenticate::bsonUser={}'.format(bsonUser))
-        if bsonUser is not None:
-            user = User()
-            user.convertFromBson(bsonUser)
-            user.pwd = bsonUser['pwd']
-            logger.info(u'authenticate::user.pwd={}'.format(user.pwd))
-            if self.check_password(user.pwd, pwd):
-                logger.info(u'authenticated::user={}'.format(user))
-                return user
-            else:
-                return None
-        else:
-            return None
+        #usersColl = localdb.users
+        #bsonUser = usersColl.find_one({"email": email})
+        #logger.info(u'authenticate::bsonUser={}'.format(bsonUser))
+        user = User()
+        user.email=email
+        user.description="ponpon"
+        return user
+        #bsonUser=dict()
+        #if bsonUser is not None:
+        #    user = User()
+        #    user.convertFromBson(bsonUser)
+        #    user.pwd = bsonUser['pwd']
+        #    logger.info(u'authenticate::user.pwd={}'.format(user.pwd))
+        #    if self.check_password(user.pwd, pwd):
+        #        logger.info(u'authenticated::user={}'.format(user))
+        #        return user
+        #    else:
+        #        return None
+        #else:
+        #    return None
+        #    """
 
     def saveAvatar(self,user_id, file):
         """ save an avatar in DB"""
