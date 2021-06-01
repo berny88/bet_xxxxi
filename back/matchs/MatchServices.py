@@ -1,13 +1,11 @@
 # -*- coding: utf-8 -*-
 from flask import Blueprint, jsonify, request, session
-from bson.objectid import ObjectId
 import logging
 import math
-import sendgrid
-from sendgrid.helpers.mail import *
-from tools.Tools import DbManager, ToolManager
-from users.UserServices import UserManager
-from bets.BetsServices import BetsManager
+from back.tools.Tools import ToolManager
+from back.tools.Tools import DbManager
+from back.users.UserServices import UserManager
+from back.bets.BetsServices import BetsManager
 
 logger = logging.getLogger(__name__)
 
@@ -180,19 +178,16 @@ class MatchsManager(DbManager):
         localdb = self.getDb()
         logger.info(u'getAllMatchs::db={}'.format(localdb))
 
-        matchsColl = localdb.matchs
-        matchsList = matchsColl.find().sort("dateMatch")
-        logger.info(u'getAllMatchs::matchsList={}'.format(matchsList))
+        matchsList = list()
+        matchsList.append("")
+        #select matchsList = matchsColl.find().sort("dateMatch")
         #Faut-il changer de list ou retourner le bson directement ?
         result = list()
 
         for matchbson in matchsList :
-            logger.info(u'\tgetAllMatchs::matchsbson={}'.format(matchbson))
             match = Match()
-            match.convertFromBson(matchbson)
-            logger.info(u'\tgetAllMatchs::match={}'.format(match))
+            match.key="FRAGER"
             tmpdict = match.__dict__
-            logger.info(u'\tgetAllMatchs::tmpdict={}'.format(tmpdict))
             result.append(tmpdict)
         return result
 

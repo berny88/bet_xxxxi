@@ -2,8 +2,6 @@
 from flask import Blueprint, jsonify, redirect, request, session
 import logging
 from uuid import uuid4
-#import sendgrid
-#from sendgrid.helpers.mail import *
 
 from back.tools.Tools import ToolManager
 from flask import send_file

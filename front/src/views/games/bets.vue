@@ -41,3 +41,39 @@
             </div>
         </div>
 </template>
+
+<script>
+    import axios from "axios";
+
+   export default {
+        name: 'bets',
+        data() {
+            return {
+                input: {
+                    email: "",
+                    thepwd: ""
+                },
+                errormsg:""
+            }
+        },
+        methods: {
+            bets_list() {
+                if(this.input.email != "" && this.input.thepwd != "") {
+                    this.$emit("authenticated", true);
+                    var connect_attr={email:this.input.email, thepwd:this.input.thepwd};
+                        axios({ method: "POST", "url": "back/users/apiv1.0/login", 
+                        "data": {connect: connect_attr}, 
+                        "headers": { "content-type": "application/json" } }).then(result => {
+                    this.errormsg = result.data;
+                    this.$router.replace({ name: "Bets" });
+                    }, error => {
+                        console.error(error);
+                        this.errormsg=error;
+                    });
+                } else {
+                    console.log("A email and password must be present");
+                }
+            }
+        }
+    }
+</script>

@@ -8,6 +8,7 @@ from flask import Flask
 print(sys.path)
 from front.front import front_end
 from back.users.UserServices import users_page
+from back.matchs.MatchServices import matchs_page
 
 
 application = Flask(__name__, static_url_path='', static_folder="")
@@ -15,6 +16,8 @@ application.secret_key = u'A0Zr98j/3yX R~XHH!jmN]LWX/,?RT#BB'
 
 application.register_blueprint(front_end, url_prefix="/front", template_folder='templates')
 application.register_blueprint(users_page, url_prefix="/back/users", template_folder='templates')
+application.register_blueprint(matchs_page, url_prefix="/back/matchs", template_folder='templates')
+
 
 print(sys.path)
 

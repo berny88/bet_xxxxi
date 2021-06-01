@@ -4,10 +4,7 @@ import logging
 import os
 import re
 from flask import Blueprint, request, render_template, redirect, url_for
-from pymongo import MongoClient
-#import sendgrid
-#from sendgrid.helpers.mail import *
-
+import sqlite3
 
 logger = logging.getLogger(__name__)
 tools_page = Blueprint('tools_page', __name__,
@@ -20,14 +17,9 @@ class DbManager:
     """
     def __init__(self):
         self.DATE_FORMAT = '%Y-%m-%dT%H:%M:%S UTC'
-        #print("avant client mongo")
-        #uri = "mongodb://berny_bet:Ponpon01@mongodb-berny.alwaysdata.net:27017/?authSource=berny_bet&authMechanism=SCRAM-SHA-1"
-
-        #client = MongoClient(uri)
-        #print(client)
-        #logger.info(u'conn={}'.format("mongodb-berny.alwaysdata.net:27017/?authSource=berny_bet"))
-        #self.db = client.berny_bet
-        #logger.info(u'db={}'.format(self.db))
+        con = sqlite3.connect('example.db')
+        self.db = con
+        logger.info(u'getDb::db={}'.format(self.db))
 
     def datetime_parser(self, dct):
         for k, v in dct.items():
@@ -52,9 +44,8 @@ class DbManager:
         if (self.db is None):
             #uri = "mongodb://berny_bet:Ponpon01@mongodb-berny.alwaysdata.net:27017/?authSource=berny_bet&authMechanism=SCRAM-SHA-1"
 
-            client = MongoClient(uri)
-            logger.info(u'getDb::conn={}'.format("mongodb+srv://phipha:phiphaxxxviii@phiphaxxxviii-cs6ex.mongodb.net"))
-            self.db = client.berny_bet
+            con = sqlite3.connect('example.db')
+            self.db = con
             logger.info(u'getDb::db={}'.format(self.db))
 
         return self.db
