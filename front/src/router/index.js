@@ -2,6 +2,8 @@ import Vue from 'vue'
 import VueRouter from 'vue-router'
 import Home from '../views/Home.vue'
 import Signin from '../views/signin.vue'
+import User from '../views/user.vue'
+import Users from '../views/users.vue'
 import Signon from '../views/logon.vue'
 import Games from '../views/games/games.vue'
 import Ranking from '../views/games/ranking.vue'
@@ -41,6 +43,16 @@ const routes = [
     component: Ranking
   },
   {
+    path: '/user',
+    name: 'User',
+    component: User
+  },
+  {
+    path: '/users',
+    name: 'Users',
+    component: Users
+  },
+  {
     path: '/about',
     name: 'About',
     // route level code-splitting
@@ -51,7 +63,7 @@ const routes = [
 ]
 
 const router = new VueRouter({
-  mode: 'history',
+  
   base: process.env.BASE_URL,
   routes
 })

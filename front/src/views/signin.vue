@@ -22,7 +22,7 @@
             <router-link to="/" class="btn btn-error" >Back</router-link>
           <br/>
           <!--<a class="btn btn-default disabled" href="#signon">No account yet ?</a> Inscriptions closed for this event !-->
-          <a class="btn btn-primary" href="#signon">No account yet ?</a>
+          <router-link to="signon" class="btn btn-error" >No account yet ?</router-link>
         </div>
     </div>
 </template>
