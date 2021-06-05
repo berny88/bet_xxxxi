@@ -6,6 +6,7 @@ from uuid import uuid4
 from back.tools.Tools import ToolManager
 from flask import send_file
 import hashlib
+import sqlite3
 
 import io
 
@@ -20,6 +21,12 @@ ui layer
 
 users_page = Blueprint('users_page', __name__,
                        template_folder='templates', static_folder='static')
+
+@users_page.route('/apiv1.0/admin/initDB', methods=['GET'])
+def getInitDB():
+    tmgr = ToolManager()
+    tmgr.createDb()
+    return jsonify({'DBcreated': "yes"})
 
 
 @users_page.route('/apiv1.0/users', methods=['GET'])
@@ -266,11 +273,11 @@ class User:
         self.isAdmin=u""
 
 
-    def convertFromBson(self, elt):
+    def convertFromDB(self, elt):
         """
         convert a User object from mongo
         """
-        if 'description' in elt.keys():
+        if 'desc' in elt.keys():
             self.description = elt['description']
         if 'email' in elt.keys():
             self.email = elt['email']
@@ -302,30 +309,33 @@ class User:
 
 class UserManager(DbManager):
 
+
     def getAllUsers(self,filterValidated):
         """ get the list of users"""
         localdb = self.getDb()
         logger.info(u'getAllUsers::db={}'.format(localdb))
+        logger.info(u'getAllUsers::row_factory={}'.format(localdb.row_factory))
 
-        usersColl = localdb.users
-        if filterValidated == "true":
-            logger.info("***** filterValidated TRUE = {}".format(filterValidated))
-            usersList = usersColl.find({"validated": True}).sort("nickName")
-        else:
-            usersList = usersColl.find().sort("nickName")
-        logger.info(u'getAllUsers::usersList={}'.format(usersList))
-        #Faut-il changer de list ou retourner le bson directement ?
-        result = list()
+        """uuid, nickName, desc, avatar, email, isAdmin"""
 
-        for userbson in usersList:
-            logger.info(u'\tgetAllUsers::userbson={}'.format(userbson))
-            user = User()
-            user.convertFromBson(userbson)
-            logger.info(u'\tgetAllUsers::user={}'.format(user))
-            tmpdict = user.__dict__
-            logger.info(u'\tgetAllUsers::tmpdict={}'.format(tmpdict))
-            result.append(tmpdict)
-        return result
+        sql_all_tab="""SELECT uuid, nickName, description, avatar, email, isAdmin, validated
+                        FROM USER order by nickName;"""
+        #localdb.row_factory = self.dict_factory
+        logger.info(u'getAllUsers::row_factory={}'.format(localdb.row_factory))
+        cur = localdb.cursor()
+        cur.execute(sql_all_tab)
+
+        rows = cur.fetchall()
+        usersList=list()
+        for row in rows:
+            if (filterValidated ):
+                if row["validated"]==1:
+                    usersList.append(row)                    
+            else:
+                usersList.append(row)
+            logger.info(row)
+        
+        return usersList
 
     def hash_password(self,password):
         # uuid is used to generate a random number

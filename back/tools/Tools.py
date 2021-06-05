@@ -5,6 +5,7 @@ import os
 import re
 from flask import Blueprint, request, render_template, redirect, url_for
 import sqlite3
+from uuid import uuid4
 
 logger = logging.getLogger(__name__)
 tools_page = Blueprint('tools_page', __name__,
@@ -12,14 +13,26 @@ tools_page = Blueprint('tools_page', __name__,
 
 
 class DbManager:
+
+    def dict_factory(self, cursor, row):
+        """
+        use to convert sqllite row into dict
+        """
+        d = {}
+        for idx, col in enumerate(cursor.description):
+            d[col[0]] = row[idx]
+        return d
+
     """
     Load all match from json file
     """
     def __init__(self):
         self.DATE_FORMAT = '%Y-%m-%dT%H:%M:%S UTC'
-        con = sqlite3.connect('example.db')
+        con = sqlite3.connect('bet_xxxxi.db')
         self.db = con
-        logger.info(u'getDb::db={}'.format(self.db))
+        self.db.row_factory = self.dict_factory
+        logger.info(u'getDb::row_factory={}'.format(self.db.row_factory))
+        logger.info(u'getDb::init::db={}'.format(self.db))
 
     def datetime_parser(self, dct):
         for k, v in dct.items():
@@ -40,19 +53,21 @@ class DbManager:
         return obj
 
     def getDb(self):
-        """ get Mongo DB access """
+        """ get SQL DB 
+        :return: connection to sqllite
+        """
         if (self.db is None):
-            #uri = "mongodb://berny_bet:Ponpon01@mongodb-berny.alwaysdata.net:27017/?authSource=berny_bet&authMechanism=SCRAM-SHA-1"
-
-            con = sqlite3.connect('example.db')
+            con = sqlite3.connect('bet_xxxxi.db')
             self.db = con
+            self.db.row_factory = self.dict_factory
             logger.info(u'getDb::db={}'.format(self.db))
+            logger.info(u'getDb::row_factory={}'.format(self.db.row_factory))
 
         return self.db
 
 
     def setDb(self, the_db):
-        """ set Mongo DB access """
+        """ set SQL DB access """
         self.db=the_db
 
 
@@ -63,72 +78,135 @@ class BetProjectClass:
 
 class ToolManager(DbManager):
 
+    def create_table(self, conn, create_table_sql):
+        """ create a table from the create_table_sql statement
+        :param conn: Connection object
+        :param create_table_sql: a CREATE TABLE statement
+        :return:
+        """
+        try:
+            c = conn.cursor()
+            c.execute(create_table_sql)
+        except sqlite3.Error as e:
+            print(e)
+            
+    def initAdmin(self, conn):
+        """ initialize 2 first admins (theBerny, Stephou)
+        :param conn: Connection object
+        """
+        try:
+            c = conn.cursor()
+            uuid = str(uuid4())
+            c.execute("""insert into USER 
+                        (uuid, nickName, email,isAdmin, validated)
+                        values
+                        ('{}', 'theBerny','bernard.bougeon@gmail.com', 1, 1);""".format(uuid))
+           
+            conn.commit()
+        except sqlite3.Error as e:
+            print(e)
+
+    def createDb(self):
+        conn = self.getDb()
+        sql_create_projects_table = """ CREATE TABLE IF NOT EXISTS USER (
+                                        uuid text PRIMARY KEY,
+                                        nickName text NOT NULL,
+                                        description text,
+                                        avatar text,
+                                        email text,
+                                        isAdmin INTEGER,
+                                        validated INTEGER
+                                    ); """
+        self.create_table(conn, sql_create_projects_table)
+        sql_create_projects_table = """ CREATE TABLE IF NOT EXISTS GAME (
+                                        uuid text PRIMARY KEY,
+                                        key text NOT NULL,
+                                        teamA text,
+                                        teamB text,
+                                        libteamA text,
+                                        libteamB text,
+                                        resultA integer,
+                                        resultB integer,
+                                        category text,
+                                        categoryName text
+                                    ); """
+        self.create_table(conn, sql_create_projects_table)
+        sql_create_projects_table = """ CREATE TABLE IF NOT EXISTS BET (
+                                        uuid text PRIMARY KEY,
+                                        FK_GAME text NOT NULL,
+                                        FK_USER text NOT NULL,
+                                        resultA integer,
+                                        resultB integer,
+                                        nbPoints integer
+                                    ); """
+        self.create_table(conn, sql_create_projects_table)
+        sql_create_projects_table = """ CREATE TABLE IF NOT EXISTS PROP (
+                                        key text PRIMARY KEY,
+                                        value text NOT NULL
+                                    ); """
+        self.create_table(conn, sql_create_projects_table)
+
+        sql_all_tab="""SELECT name FROM sqlite_master WHERE type='table';"""
+        cur = conn.cursor()
+        cur.execute(sql_all_tab)
+
+        rows = cur.fetchall()
+
+        for row in rows:
+            logger.info(row)
+
+        self.initAdmin(conn)
+
+
+
     def getProperties(self):
         """ get the complete list of properties"""
         localdb = self.getDb()
-        logger.info(u'getProperties::db={}'.format(localdb))
+        sql_all_properties="""SELECT key, value FROM PROP;"""
+        cur = localdb.cursor()
+        cur.execute(sql_all_properties)
 
-        propertiesColl = localdb.properties
-        propertiesList = propertiesColl.find()
-        logger.info(u'propertiesList={}'.format(propertiesList))
+        rows = cur.fetchall()
+
         result = list()
-        for prop in propertiesList:
-            logger.info(u'\tprop={}'.format(prop))
-            result.append(prop)
+        for row in rows:
+            logger.info(u'\tprop={}'.format(row))
+            result.append(row)
         return result
 
     def saveProperty(self, key, value):
         """ save a property"""
         localdb = self.getDb()
-        logger.info(u'saveProperties::db={}'.format(localdb))
 
-        propertiesColl = localdb.properties
-        bsonProperty = propertiesColl.find_one({"key": key})
-        logger.info(u'saveProperties::bsonProperty ={}'.format(bsonProperty ))
-        if (bsonProperty is None):
-            bsonProperty =dict()
-            bsonProperty ["key"]=key
-            bsonProperty ["value"]=value
-            logger.info(u'\tkey None - to create : {}'.format(bsonProperty))
-            id = self.getDb().properties.insert_one(bsonProperty).inserted_id
-            logger.info(u'\tid : {}'.format(id))
-
-        else:
-            if (value != ""):
-                propertiesColl.update({"_id":bsonProperty["_id"]},
-                    {"$set":{"key":key, "value":value}}, upsert=True)
+        #select prop by key - to insert or update
+        try:
+            c = localdb.cursor()
+            p = self.getProperty(key)
+            if p is None:
+                logger.info(u'insert prop={}/{}'.format(key, value))
+                c.execute("""insert into PROP 
+                            (key, value)
+                            values
+                            ('{}', '{}');""".format(key, value))
             else:
-                propertiesColl.delete_one({"_id":bsonProperty["_id"]})
-        logger.info(u'saveProperty={}'.format(bsonProperty))
+                logger.info(u'update prop={}/{}'.format(key, value))
+                c.execute("""update PROP 
+                            set value='{}'
+                            where key = '{}');""".format(value, key))
+            localdb.commit()
+        except sqlite3.Error as e:
+            print(e)
+
+        logger.info(u'saveProperty={}/{}'.format(key, value))
 
     def getProperty(self, key):
         """ get one property by key"""
         localdb = self.getDb()
-        logger.info(u'getProperties::db={}'.format(localdb))
+        c = localdb.cursor("select key, value from PROP where key='{}'".format(key))
+        
+        prop =  c.fetchone()
+        return prop
 
-        propertiesColl = localdb.properties
-        bsonProperty = propertiesColl.find_one({"key": key})
-        if bsonProperty is None:
-            res=dict()
-            res["key"]=key
-            res["value"]=""
-            return res
-        return bsonProperty
-
-    def get_sendgrid(self):
-        u"""
-        search in  properties account to send email with sendgrid and return a sendclient
-        :return the sendGrid objet to send email
-        """
-        #user = self.getProperty("send_grid_user")["value"]
-        #pwd = self.getProperty("send_grid_pwd")["value"]
-        #logger.info("sendgrid={}/{}".format(user, pwd))
-        #sg = sendgrid.SendGridClient(user,
-        #                             pwd)
-        # api_key=self.getProperty('SENDGRID_API_KEY')["value"]
-        # logger.info("sendgrid={}".format(api_key))
-        # sg = sendgrid.SendGridAPIClient(apikey=api_key)
-        return sg
 
 
 @tools_page.route('/properties/', methods=['GET'])
