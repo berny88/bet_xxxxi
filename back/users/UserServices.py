@@ -58,7 +58,8 @@ def getuser(user_id):
         logger.info(u'saveuser::userid={}'.format(user.user_id))
         checkRight=False
         #first connection
-        if user.nickName is None and user.description is None:
+        if user.nickName == "" and user.description == "":
+            logger.info("nickName &nd descrption are None")
             checkRight=True
         else:
             if "cookieUserKey" in session:
