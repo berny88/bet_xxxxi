@@ -56,6 +56,7 @@ def getuser(user_id):
         userFromClient = request.json["connect"]
         #call Service (DAO)
         logger.info(u'saveuser::userid={}'.format(user.user_id))
+        logger.info(u'saveuser::userFromClient={}'.format(userFromClient))
         checkRight=False
         #first connection
         if user.nickName == "" and user.description == "":
@@ -72,10 +73,12 @@ def getuser(user_id):
                     checkRight=True
         if (checkRight):
             if "thepwd" in userFromClient:
+                logger.info("thepwd set")
                 mgr.saveUser(user.email, userFromClient["nickName"],
                             userFromClient["description"], user.user_id, user.validated,
                             userFromClient["thepwd"])
             else:
+                logger.info("thepwd NOT set")
                 mgr.saveUser(user.email, userFromClient["nickName"],
                     userFromClient["description"], user.user_id, user.validated,
                     "")
