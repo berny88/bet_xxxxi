@@ -1,25 +1,25 @@
 
 <template>
   <div id="app">
-<div class="container grid-960">
-  <div class="columns">
-      <div class="column">
+    <div class="container grid-960">
+      <div class="columns">
+          <div class="column">
 
-        <header class="navbar nav-default">
-        <section class="navbar-section">
-          <ul>
-            <li><router-link to="/" class="btn btn-link">Home</router-link> </li>
-            <li><router-link to="/bets" class="btn btn-link">Bets</router-link> </li>
-            <li><router-link to="/games" class="btn btn-link">Games</router-link> </li>
-            <li><router-link to="/users" class="btn btn-link">Betors</router-link> </li>
-            <li><router-link to="/ranking" class="btn btn-link">Ranking</router-link> </li>
-            <li><router-link to="/about" class="btn btn-link">About</router-link></li>
-          </ul>
-        </section>
-      </header>
-      <router-view/>
-      </div>
-    </div>
+            <header class="navbar">
+            <section class="navbar-section">
+              <ul>
+                <li><router-link to="/" class="btn btn-link">Home</router-link> </li>
+                <li><router-link to="/bets" class="btn btn-link">Bets</router-link> </li>
+                <li><router-link to="/games" class="btn btn-link">Games</router-link> </li>
+                <li><router-link to="/users" class="btn btn-link">Betors</router-link> </li>
+                <li><router-link to="/ranking" class="btn btn-link">Ranking</router-link> </li>
+                <li><router-link to="/about" class="btn btn-link">About</router-link></li>
+              </ul>
+            </section>
+          </header>
+          <router-view/>
+          </div>
+        </div>
   </div>
 </template>
 
@@ -28,7 +28,6 @@
         name: 'App',
         data() {
             return {
-                authenticated: false,
                 mockAccount: {
                     email: "nraboy",
                     thepwd: "password"
@@ -36,16 +35,13 @@
             }
         },
         mounted() {
-            if(!this.authenticated) {
+            if(!this.$store.state.isConnected) {
                 this.$router.replace({ name: "Signin" });
             }
         },
         methods: {
-            setAuthenticated(status) {
-                this.authenticated = status;
-            },
             logout() {
-                this.authenticated = false;
+                this.$store.state.isConnected = false;
             }
         }
     }
@@ -55,7 +51,8 @@
   @import 'https://unpkg.com/spectre.css/dist/spectre.min.css';
   @import 'https://unpkg.com/spectre.css/dist/spectre-exp.min.css';
   @import 'https://unpkg.com/spectre.css/dist/spectre-icons.min.css';
-#app {
+
+  #app {
   font-family: Avenir, Helvetica, Arial, sans-serif;
   -webkit-font-smoothing: antialiased;
   -moz-osx-font-smoothing: grayscale;
@@ -137,4 +134,5 @@
     width: 100%;
   }
 }
+
 </style>

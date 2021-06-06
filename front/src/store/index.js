@@ -6,8 +6,7 @@ Vue.use(Vuex)
 export default new Vuex.Store({
   state: {
     isConnected:false,
-    u:"",
-    p:"",
+    uid:"",
     errors:[{message:""}, 
             {message:""}]
   },
@@ -19,12 +18,11 @@ export default new Vuex.Store({
   actions: {
       connect(context, user, pwd) {
         alert("connect "+ user +"/"+ pwd);
-        context.state.u=user;
-        context.state.p=pwd;
+        context.state.uid=user;
         var isconn=true;
         context.commit('CONNECT', isconn)
       }
   },
   modules: {
-    }
+  }
 })

@@ -50,6 +50,8 @@
                         "data": {connect: connect_attr}, 
                         "headers": { "content-type": "application/json" } }).then(result => {
                                         this.errormsg = result.data;
+                                        this.$store.state.uid=result.data.user.user_id
+                                        this.$store.state.isConnected=true;
                                         this.$router.replace({ name: "Bets" });
                                         }, error => {
                                             console.error(error);

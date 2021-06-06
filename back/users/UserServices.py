@@ -53,11 +53,12 @@ def getuser(user_id):
     mgr = UserManager()
     user = mgr.getUserByUserId(user_id)
     if request.method == 'POST':
-        userFromClient = request.json["user"]
+        userFromClient = request.json["connect"]
         #call Service (DAO)
-        logger.info(u'saveuser::user={}'.format(user))
+        logger.info(u'saveuser::userid={}'.format(user.user_id))
         checkRight=False
-        if user.pwd=="" or user.pwd is None:
+        #first connection
+        if user.nickName is None and user.description is None:
             checkRight=True
         else:
             if "cookieUserKey" in session:
@@ -69,11 +70,16 @@ def getuser(user_id):
                 if (userFromCookie.isAdmin):
                     checkRight=True
         if (checkRight):
-            mgr.saveUser(user.email, userFromClient["nickName"],
-                         userFromClient["description"], user.user_id, user.validated,
-                         userFromClient["pwd"])
+            if "thepwd" in userFromClient:
+                mgr.saveUser(user.email, userFromClient["nickName"],
+                            userFromClient["description"], user.user_id, user.validated,
+                            userFromClient["thepwd"])
+            else:
+                mgr.saveUser(user.email, userFromClient["nickName"],
+                    userFromClient["description"], user.user_id, user.validated,
+                    "")
 
-            return jsonify({'user': request.json["user"]})
+            return jsonify({'user': request.json["connect"]})
         else:
             return "Ha ha ha ! Mais t'es pas la bonne personne pour faire ça, mon loulou", 403
     else:
@@ -89,8 +95,10 @@ def subscriptionPost():
     :return: forward to a page (not angular style : TODO change it if necessary)
     """
     logger.info("subscriptionPost")
-    email = request.form['email']
-
+    connect = request.json["connect"]
+    logger.info(u"subscriptionPost::connect:{}".format(connect))
+    email=connect["email"]
+    logger.info(u"subscriptionPost::email:{}".format(email))
     mgr = UserManager()
     user = mgr.getUserByEmail(email)
     if user is None:
@@ -99,12 +107,8 @@ def subscriptionPost():
         uuid = str(uuid4())
         logger.info(u"subscriptionPost::new user:: need new user_id:{}".format(uuid))
         mgr.saveUser(email, "", "", uuid, False, "")
-        logger.info(u"\tsubscriptionPost::save done")
-        tool_mgr = ToolManager()
-        url_root = tool_mgr.getProperty("url_root")["value"]
-        urlcallback=u"{}/#/user?uid".format(url_root, uuid)
-        logger.info("urlcallback={}".format(urlcallback))
-        return redirect("{}".format(urlcallback))
+        logger.info(u"\tsubscriptionPost::save done : return uuid={}".format(uuid))
+        return jsonify({'uuid': uuid})
     else:
         if user.validated:
             tool_mgr = ToolManager()
@@ -153,11 +157,12 @@ def confirmationSubscription(user_id):
 
 @users_page.route('/apiv1.0/login', methods=['POST'])
 def login():
-    logger.info("API LOGIN:: param={}/ method={}".format(request.json, request.method))
+    logger.info("login::API LOGIN:: param={}/ method={}".format(request.json, request.method))
     connect = request.json["connect"]
+    logger.info("login::connect={}".format(connect))
     mgr = UserManager()
     user = mgr.authenticate(connect["email"], connect["thepwd"])
-    logger.info("auth user={}".format(user))
+    logger.info("login::auth user={}".format(user))
     if (user is None):
         return "not authenticated", 401
     else:
@@ -260,14 +265,16 @@ class User:
             self.email = elt['email']
         if 'nickName' in elt.keys():
             self.nickName = elt['nickName']
-        if 'user_id' in elt.keys():
-            self.user_id = elt['user_id']
+        if 'uuid' in elt.keys():
+            self.user_id = elt['uuid']
         if 'validated' in elt.keys():
             self.validated = elt['validated']
         if 'hashedpwd' in elt.keys():
             self.pwd= elt['hashedpwd']
         if 'isAdmin' in elt.keys():
             self.isAdmin= elt['isAdmin']
+        else:
+            self.isAdmin=False
 
     def convertIntoDB(self):
         """
@@ -278,7 +285,7 @@ class User:
         elt['description'] = self.description
         elt['email'] = self.email
         elt['nickName'] = self.nickName
-        elt['user_id'] = self.user_id
+        elt['uuid'] = self.user_id
         elt['validated'] = self.validated
         elt['hashedpwd'] = self.pwd
         elt['isAmin'] = self.isAdmin
@@ -332,27 +339,26 @@ class UserManager(DbManager):
                 usr.description=description
                 usr.nickName=nickName
                 usr.validated=validated        
-                uuid = str(uuid4())
-                usr.user_id=uuid
+                usr.user_id=user_id                
                 c.execute("""insert into BETUSER 
-                    (uuid, nickName, email,description, validated, hashedpwd)
+                    (uuid, nickName, email,description, validated )
                     values
-                    ('{}', '{}','{}', '{}', '{}','{}');""".format(uuid, nickName,email, description, validated, self.hash_password(pwd)))            
+                    ('{}', '{}','{}', '{}', '{}');""".format(user_id, nickName,email, description, validated))            
             else:
-                logger.info(u'\t try update to user : {} '.format(usr))
+                logger.info(u'\t try update to user : {} '.format(usr.user_id))
                 usr.email=email
                 usr.description=description
                 usr.nickName=nickName
                 usr.validated=validated        
                 if (pwd != ""):
-                    c.execute("""update into BETUSER 
-                    set nickName={}, email={},description={}, validated={}, hashedpwd={})
+                    c.execute("""update BETUSER 
+                    set nickName='{}', email='{}',description='{}', validated='{}', hashedpwd='{}'
                     where
                     uuid='{}'""".format(nickName,email, description, validated, self.hash_password(pwd), user_id))            
 
                 else:
-                    c.execute("""update into BETUSER 
-                    set nickName={}, email={},description={}, validated={})
+                    c.execute("""update BETUSER 
+                    set nickName='{}', email='{}',description='{}', validated='{}'
                     where
                     uuid='{}'""".format(nickName,email, description, validated, user_id))            
             
@@ -416,7 +422,7 @@ class UserManager(DbManager):
         localdb = self.getDb()
         logger.info(u'authenticate::email={}/pwd={}'.format(email, pwd))
 
-        user = self.getUserByEmail()
+        user = self.getUserByEmail(email)
         #logger.info(u'authenticate::bsonUser={}'.format(bsonUser))
         #bsonUser=dict()
         if user is not None:

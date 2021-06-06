@@ -43,7 +43,7 @@ const routes = [
     component: Ranking
   },
   {
-    path: '/user',
+    path: '/user/:uid',
     name: 'User',
     component: User
   },
