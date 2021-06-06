@@ -97,7 +97,7 @@ class ToolManager(DbManager):
         try:
             c = conn.cursor()
             uuid = str(uuid4())
-            c.execute("""insert into USER 
+            c.execute("""insert into BETUSER 
                         (uuid, nickName, email,isAdmin, validated)
                         values
                         ('{}', 'theBerny','bernard.bougeon@gmail.com', 1, 1);""".format(uuid))
@@ -108,11 +108,12 @@ class ToolManager(DbManager):
 
     def createDb(self):
         conn = self.getDb()
-        sql_create_projects_table = """ CREATE TABLE IF NOT EXISTS USER (
+        sql_create_projects_table = """ CREATE TABLE IF NOT EXISTS BETUSER (
                                         uuid text PRIMARY KEY,
                                         nickName text NOT NULL,
                                         description text,
                                         avatar text,
+                                        hashedpwd text,
                                         email text,
                                         isAdmin INTEGER,
                                         validated INTEGER
@@ -202,9 +203,14 @@ class ToolManager(DbManager):
     def getProperty(self, key):
         """ get one property by key"""
         localdb = self.getDb()
-        c = localdb.cursor("select key, value from PROP where key='{}'".format(key))
+        c = localdb.cursor()
+        c.execute("select key, value from PROP where key='{}'".format(key))
         
         prop =  c.fetchone()
+        if prop is None:
+            prop=dict()
+            prop[u"key"]=u""
+            prop[u"value"]=u"http://localhost:5000"
         return prop
 
 
