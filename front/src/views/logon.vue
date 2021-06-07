@@ -13,8 +13,8 @@
           </script>
         </div>
         <button type="submit"  v-on:click="save()" id="submit" name="submit" value="Sign in"
-          class="btn btn-primary">Sign up now !</button>
-          <a class="btn btn-error" href="/">Back</a>
+          class="btn btn-primary">Sign up now !</button>&nbsp;
+          <a class="btn btn-error" href="/">Back</a><br/>
       <span>This email will be your user account. We will just use it to notify the daily ranking.<br/>
       We don't sell your personnal data because the GAFAM already have this informations.
       </span>

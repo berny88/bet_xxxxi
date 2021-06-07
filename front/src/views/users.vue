@@ -25,7 +25,7 @@
                 </thead>
                 <tbody >
                     <tr v-for="b in betors" :key="b.uuid">
-                        <td>avatar TODO</td>
+                        <td>avatar coming soon</td>
                         <td>{{ b.nickName }} </td>
                         <td>{{ b.description }}</td>
                         <td></td>                            

@@ -60,7 +60,7 @@ def getuser(user_id):
         checkRight=False
         #first connection
         if user.nickName == "" and user.description == "":
-            logger.info("nickName &nd descrption are None")
+            logger.info("nickName &nd descrption are None - First subscription")
             checkRight=True
         else:
             if "cookieUserKey" in session:
@@ -68,9 +68,10 @@ def getuser(user_id):
                 logger.info(u"getuser::cookieUserKey={}".format(cookieUserKey))
                 if (user.user_id==cookieUserKey):
                     checkRight=True
-                userFromCookie = mgr.getUserByUserId(cookieUserKey)
-                if (userFromCookie.isAdmin):
-                    checkRight=True
+                else:
+                    userFromCookie = mgr.getUserByUserId(cookieUserKey)
+                    if (userFromCookie.isAdmin):
+                        checkRight=True
         if (checkRight):
             if "thepwd" in userFromClient:
                 logger.info("thepwd set")
@@ -170,6 +171,7 @@ def login():
     if (user is None):
         return "not authenticated", 401
     else:
+        logger.info("login::push cookies={}".format(user.user_id))
         session['cookieUserKey'] = user.user_id
         return jsonify({'user': user.__dict__}), 200
 
