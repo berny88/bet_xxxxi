@@ -77,6 +77,27 @@ def getBets(user_id):
     logger.debug(u"getBets::bets={}".format(bets))
     return jsonify({'bets': bets})
 
+@matchs_page.route('/apiv1.0/matchs/<user_id>/bets', methods=['POST'])
+def saveBets(user_id):
+    u"""
+    Save bets
+    :param user_id: id of user (uuid)
+    :return:  a json form for the list of bet
+    """
+    betslist = request.json["connect"]
+    logger.info(u"saveBets::bets={} ".format(betslist))
+    logger.info(u"saveBets::bets={} ".format(betslist["bets"]))
+
+    cookieUserKey = session['cookieUserKey']
+    logger.info(u"saveBets::cookieUserKey={} ".format(cookieUserKey))
+    if (cookieUserKey == user_id):
+        betsMgr = BetsManager()
+        bets = betsMgr.createOrUpdateBets(user_id, betslist["bets"])
+    #this.games
+    logger.debug(u" ------------ ")
+    logger.debug(u"getBets::bets={}".format(bets))
+    return jsonify({'data': "great, U R the best !"})
+
 u"""
 **************************************************
 Service layer

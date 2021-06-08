@@ -4,6 +4,7 @@ import logging
 from datetime import datetime
 from flask import Blueprint, jsonify
 from uuid import uuid4
+import sqlite3
 
 from back.tools.Tools import DbManager, BetProjectClass
 from back.users.UserServices import UserManager
@@ -49,6 +50,7 @@ class Bet(BetProjectClass):
     """""
 
     def __init__(self):
+        self.bet_uuid = u""
         self.user_id = u""
         self.game_id = u""
         self.key = u""
@@ -98,7 +100,7 @@ class BetsManager(DbManager):
         # get all bets+games+user attrb
         sql_bets_by_user="""
             SELECT category, key, date, libteamA, teamA, libteamB, teamB,
-            u.uuid, b.resultA, b.resultB, nbPoints
+            u.uuid, b.resultA, b.resultB, nbPoints, b.uuid as bet_uuid
             FROM GAME g, BETUSER u, BET b
             where  b.FK_GAME=g.key
             and b.FK_USER=u.uuid
@@ -127,6 +129,7 @@ class BetsManager(DbManager):
 
         for row in rows:
             bet = Bet()
+            bet.bet_uuid=row["bet_uuid"]
             bet.user_id=row["uuid"]
             bet.game_id=row["key"]
             bet.dateMatch=row["date"]
@@ -146,7 +149,7 @@ class BetsManager(DbManager):
 
         return result
 
-    def createOrUpdateBets(self, user_id, com_id, bets):
+    def createOrUpdateBets(self, user_id, bets):
         u"""
         update a list af bet for user in a community
         :param user_id: id of user (to check with the detail of bet)
@@ -156,16 +159,11 @@ class BetsManager(DbManager):
         """
         nbHit = 0
         for b in bets:
-            bet = Bet()
-            bet.convertFromBson(b)
-            # STEP 1 : contrôle de l'intégrité de la requête (évite l'aller plus loin si pb). L'intégrité en DB est vérifiée
-            # plus loin
             currDate = datetime.utcnow()
+            logger.warn(u'\ttry save : b={}\n'.format(b))
             logger.info(u'\t\t****** CtrlDateFront - currDate : {}'.format(currDate))
-            logger.info(u'\t\t****** CtrlDateFront - deadLine : {}'.format(datetime.strptime(bet.dateDeadLineBet, "%Y-%m-%dT%H:%M:%SZ")))
-            if bet.user_id==user_id and bet.com_id==com_id and datetime.strptime(bet.dateDeadLineBet, "%Y-%m-%dT%H:%M:%SZ") > currDate:
-                logger.warn(u'\ttry save : {}\n'.format(b))
-                self.createOrUpdate(bet)
+            if b["user_id"]==user_id :
+                self.createOrUpdate(b)
                 nbHit = nbHit + 1
             else:
                 logger.warn(u'\tdate limite dépassée, on n\'enregistre pas : {}\n'.format(b))
@@ -177,43 +175,24 @@ class BetsManager(DbManager):
         :param bet: the bet to create or update
         :return: the bet (i'm sure if it is good idea)
         """
-        bsonBet = self.getDb().bets.find_one({"user_id": bet.user_id, "com_id": bet.com_id,
-                                              "key": bet.key})
+        #update to do
+        localdb = self.getDb()
+        try:
+            c = localdb.cursor()
+            c.execute("""update BET 
+                        set resultA='{}', resultB='{}'
+                        where
+                        uuid='{}'""".format(bet["resultA"], bet["resultB"], bet["bet_uuid"]))  
+            localdb.commit()
+                      
+        except sqlite3.Error as e:
+            logger.error(e)
+            logger.info(u'\tid : {}'.format(user_id))
+            localdb.rollback()
+            logger.info(u'createOrUpdate::rollback')
+            return False
 
-        # STEP 2 : contrôle de la date limite de pari depuis la DB
-        currDate = datetime.utcnow()
-
-        if bsonBet is None:
-            bsonMatch = self.getDb().matchs.find_one({"key": bet.key})
-
-            logger.info(u'\t\t****** CtrlDateDB - currDate : {}'.format(currDate))
-            logger.info(u'\t\t****** CtrlDateDB - deadLine : {}'.format(datetime.strptime(bsonMatch["dateDeadLineBet"], "%Y-%m-%dT%H:%M:%SZ")))
-
-            if datetime.strptime(bsonMatch["dateDeadLineBet"], "%Y-%m-%dT%H:%M:%SZ") < currDate:
-                logger.info(u'\t\thack en cours par le user : {}'.format(bet.user_id))
-            else:
-                bsonBet = bet.convertIntoBson()
-                bsonBet .pop("_id", None)
-                logger.info(u'\t\tto create : {}'.format(bsonBet))
-                newid = self.getDb().bets.insert_one(bsonBet).inserted_id
-                logger.info(u'\t\tid : {}'.format(newid))
-        else:
-            logger.info(u'\t\t****** CtrlDateDB - currDate : {}'.format(currDate))
-            logger.info(u'\t\t****** CtrlDateDB - deadLine : {}'.format(datetime.strptime(bsonBet["dateDeadLineBet"], "%Y-%m-%dT%H:%M:%SZ")))
-            if datetime.strptime(bsonBet["dateDeadLineBet"], "%Y-%m-%dT%H:%M:%SZ") < currDate:
-                logger.info(u'\t\thack en cours par le user : {}'.format(bet.user_id))
-            else:
-                logger.info(u'\t\t try update to bsonBet["_id" : {}] with bet={}'.format(bsonBet["_id"], bet))
-                self.getDb().bets.update({"_id": bsonBet["_id"]},
-                                          {"$set": {"com_id": bet.com_id, "user_id": bet.user_id,
-                                                    "key": bet.key, "category": bet.category,
-                                                    "categoryName": bet.categoryName,
-                                                    "dateDeadLineBet": bet.dateDeadLineBet,
-                                                    "dateMatch": bet.dateMatch, "libteamA": bet.libteamA,
-                                                    "libteamB": bet.libteamB,
-                                                    "teamA": bet.teamA, "teamB": bet.teamB,
-                                                    "resultA": bet.resultA, "resultB": bet.resultB}}, upsert=True)
-        return bet
+        return True
 
 
     def saveScore(self, bet):
