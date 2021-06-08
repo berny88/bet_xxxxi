@@ -29,18 +29,24 @@
                             <th>
                             </th>
                             <th>
+                            </th>
+                            <th>
+                            </th>
+                            <th>
                                 Team B
                             </th>
                         </tr>
                     </thead>
                     <tbody id="v-for-object">
-                        <tr v-for="p in posts" :key="p.title">
-                            <td > {{ p.title }}</td>
-                            <td > {{ p.body }}</td>
-                            <td ><span class="newflags FRA"></span> ta</td>
-                            <td ><input style="width:50px;text-align:center;" value="FRA" disabled></td>
-                            <td ><input style="width:50px;text-align:center;" value="GER" disabled></td>
-                            <td ><span class="newflags GER"></span> GER</td>
+                        <tr v-for="p in games" :key="p.key">
+                            <td > {{ p.date }}</td>
+                            <td > {{ p.category }}</td>
+                            <td > {{ p.libteamA }}</td>
+                            <td ><span class="newflags FRA"></span> </td>
+                            <td ><input style="width:50px;text-align:center;" value="" disabled></td>
+                            <td ><input style="width:50px;text-align:center;" value="" disabled></td>
+                            <td ><span class="newflags GER"></span> </td>
+                            <td > {{ p.libteamB }}</td>
                         </tr>
                     </tbody>
                 </table>
@@ -55,7 +61,7 @@ export default {
     data () {
         return {
         loading: false,
-        posts: [{ title: 'Foo' }, { title: 'Bar' }],
+        games: [{ title: 'Foo' }, { title: 'Bar' }],
         error: null
         }
     },
@@ -76,12 +82,10 @@ export default {
             axios({ method: "GET", "url": "back/matchs/apiv1.0/matchs", 
                     "data": {connect: connect_attr}, 
                     "headers": { "content-type": "application/json" } }).then(result => {
-                            this.errormsg = result.data;
+                            //{"category":"GRPA","date":"2021/06/11 21:00:00","key":"GRPA-TURITA","libteamA":"Turkey","libteamB":"Italia","resultA":null,"resultB":null,"teamA":"TUR","teamB":"ITA"}
+                            this.games = result.data.matchs;
                             this.loading = false;
-                            this.posts = [{title:"ponpon", body:"thebodyponpon"},
-                            {title:"podddddnpon", body:"thebodyponpondddddd"},
-                            {title:"pdddddodddddnpon", body:"333333thebodyponpondddddd"},
-                            ];
+                            
                             }, error => {
                                 console.error(error);
                                 this.errormsg=error;

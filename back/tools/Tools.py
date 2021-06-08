@@ -120,8 +120,8 @@ class ToolManager(DbManager):
                                     ); """
         self.create_table(conn, sql_create_projects_table)
         sql_create_projects_table = """ CREATE TABLE IF NOT EXISTS GAME (
-                                        uuid text PRIMARY KEY,
-                                        key text NOT NULL,
+                                        key text PRIMARY KEY,
+                                        date text ,
                                         teamA text,
                                         teamB text,
                                         libteamA text,

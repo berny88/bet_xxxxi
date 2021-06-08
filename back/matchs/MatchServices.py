@@ -176,19 +176,20 @@ class MatchsManager(DbManager):
         get the complete list of matchs
         """
         localdb = self.getDb()
-        logger.info(u'getAllMatchs::db={}'.format(localdb))
 
-        matchsList = list()
-        matchsList.append("")
-        #select matchsList = matchsColl.find().sort("dateMatch")
-        #Faut-il changer de list ou retourner le bson directement ?
+        """uuid, nickName, desc, avatar, email, isAdmin"""
+
+        sql_all_game="""SELECT category, key, date, libteamA, teamA, libteamB, teamB,
+            resultA, resultB
+                        FROM GAME order by date;"""
+        cur = localdb.cursor()
+        cur.execute(sql_all_game)
+
+        rows = cur.fetchall()
         result = list()
-
-        for matchbson in matchsList :
-            match = Match()
-            match.key="FRAGER"
-            tmpdict = match.__dict__
-            result.append(tmpdict)
+        for row in rows:
+            result.append(row)                    
+            logger.info("game={}".format(row))
         return result
 
 
