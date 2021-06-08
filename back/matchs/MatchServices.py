@@ -58,6 +58,24 @@ def updateMatchsResults():
     else:
         return "Ha ha ha ! Mais t'es qui pour faire ça, mon loulou ?", 403
 
+@matchs_page.route('/apiv1.0/matchs/<user_id>/bets', methods=['GET'])
+def getBets(user_id):
+    u"""
+    return the list of all bets of a user in a community.
+    If user has never bet, we return the list of Matchs.
+    :param com_id: id of community (uuid)
+    :param user_id: id of user (uuid)
+    :return:  a json form for the list of bet
+    """
+    mgr = MatchsManager()
+    game_list = mgr.getAllMatchs()
+            
+    betsMgr = BetsManager()
+    bets = betsMgr.getBetsOfUser(user_id, game_list)
+
+    logger.debug(u" ------------ ")
+    logger.debug(u"getBets::bets={}".format(bets))
+    return jsonify({'bets': bets})
 
 u"""
 **************************************************
@@ -179,11 +197,11 @@ class MatchsManager(DbManager):
 
         """uuid, nickName, desc, avatar, email, isAdmin"""
 
-        sql_all_game="""SELECT category, key, date, libteamA, teamA, libteamB, teamB,
+        sql_all_games="""SELECT category, key, date, libteamA, teamA, libteamB, teamB,
             resultA, resultB
                         FROM GAME order by date;"""
         cur = localdb.cursor()
-        cur.execute(sql_all_game)
+        cur.execute(sql_all_games)
 
         rows = cur.fetchall()
         result = list()

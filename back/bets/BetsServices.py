@@ -3,6 +3,7 @@ import logging
 
 from datetime import datetime
 from flask import Blueprint, jsonify
+from uuid import uuid4
 
 from back.tools.Tools import DbManager, BetProjectClass
 from back.users.UserServices import UserManager
@@ -24,20 +25,18 @@ def getRatesOfAMatch(key):
     logger.info(">>{}".format(jsonify({'rates': rates}).data))
     return jsonify({'rates': rates})
 
+
+
 class Bet(BetProjectClass):
     u""""
-    _id (soit uuid soit objectid mongo)
     user_id (=uuid)
-    com_id (uuid)
+    FK_GAME
+    FK_USER
     key : "GROUPEE_SWE_BEL"
     category (GROUPE, 1_4, 1_2, 1_1, 1)
     categoryName (groupeA, Quart 01, Demi 02...)
     dateDeadLineBet :  date limite de saisi du pari
     dateMatch : date match pour info
-    libteamA: nom equipe A
-    libteamB: nom équipe B
-    teamA : code Equipe A
-    teamB : code Equipe A
     resultA : pari resutat teamA
     resultB : pari resutat teamB
     nbpoints : score calculated after the end of the match
@@ -50,19 +49,19 @@ class Bet(BetProjectClass):
     """""
 
     def __init__(self):
-        self._id = None
         self.user_id = u""
-        self.com_id = u""
+        self.game_id = u""
         self.key = u""
         self.resultA = None
         self.resultB = None
+        self.dateMatch= None
         self.category = u""
         self.categoryName = u""
         self.libteamA = u""
         self.libteamB = u""
         self.teamA = u""
         self.teamB = u""
-        self.nbpoints = 0
+        self.nbPoints = 0
 
     def convertFromBson(self, elt):
         """
@@ -92,45 +91,56 @@ class Bet(BetProjectClass):
 
 
 class BetsManager(DbManager):
-    def getBetsOfUserAndCom(self, user_id, com_id):
+    def getBetsOfUser(self, user_id, game_list):
+        logger.info("getBetsOfUserAndCom::START **")
         localdb = self.getDb()
-        # get all matchs
-        matchsList = localdb.matchs.find().sort("dateMatch")
-
-        # search all bets for user and community
-        betsList = localdb.bets.find({"user_id": user_id, "com_id": com_id})
-        logger.info(u'getBets::betsList={}'.format(betsList))
-        # Faut-il changer de list ou retourner le bson directement ?
         result = list()
+        # get all bets+games+user attrb
+        sql_bets_by_user="""
+            SELECT category, key, date, libteamA, teamA, libteamB, teamB,
+            u.uuid, b.resultA, b.resultB, nbPoints
+            FROM GAME g, BETUSER u, BET b
+            where  b.FK_GAME=g.key
+            and b.FK_USER=u.uuid
+            and u.uuid='{}'
+            order by g.date;"""
+        cur = localdb.cursor()
+        cur.execute(sql_bets_by_user.format(user_id))
+        rows = cur.fetchall()
+        logger.info("getBetsOfUserAndCom::rowcount=".format( cur.rowcount ))
+        if len(rows) == 0:
+            ##insert empty games by 1 sql and sequence or one by one with uuid ?
+            logger.info("getBetsOfUserAndCom::no bet yet - need to initialized")
+            #then reload
+            for m in game_list:
+                logger.info("getBetsOfUserAndCom::insert a new empty bet for {}/{}".format(m,user_id))
+                uuid = str(uuid4())
+                logger.info("getBetsOfUserAndCom::key={}".format(m['key']))
+                cur.execute("""insert into BET 
+                    (uuid, FK_GAME, FK_USER,nbPoints )
+                    values
+                    ('{}', '{}','{}', '{}');""".format(uuid, m['key'],user_id, 0))            
+            localdb.commit()
+            cur.execute(sql_bets_by_user.format(user_id))
+            rows = cur.fetchall()
+            logger.info("getBetsOfUserAndCom::reload bet::{}".format(len(rows)))
 
-        matchsDict = dict()
-        for matchbson in matchsList:
-            matchsDict[matchbson[u"key"]] = matchbson
-
-        betsDict = dict()
-        for betbson in betsList:
-            betsDict[betbson[u"key"]] = betbson
-
-        for key in matchsDict:
-            logger.info(u'\tgetBetsOfUserAndCom::key={}'.format(key))
+        for row in rows:
             bet = Bet()
-            bet.user_id = user_id
-            bet.com_id = com_id
-            if key in betsDict:
-                bet.convertFromBson(betsDict[key])
-                logger.info(u'\tgetBetsOfUserAndCom::bet={}'.format(bet))
-                tmpdict = bet.__dict__
-                result.append(tmpdict)
-            else:
-                matchsDict[key].pop("_id", None)
-                bet.convertFromBson(matchsDict[key])
-                # force result to none if user has never bet
-                bet._id = None
-                bet.resultA = None
-                bet.resultB = None
-                logger.info(u'\tgetBetsOfUserAndCom::bet={}'.format(bet))
-                tmpdict = bet.__dict__
-                result.append(tmpdict)
+            bet.user_id=row["uuid"]
+            bet.game_id=row["key"]
+            bet.dateMatch=row["date"]
+            bet.resultA=row["resultA"]
+            bet.resultB=row["resultB"]
+            bet.libteamA = row["libteamA"]
+            bet.libteamB = row["libteamB"]
+            bet.teamA = row["teamA"]
+            bet.teamB = row["teamB"]
+            bet.nbPoints = row["nbPoints"]
+
+            logger.info("getBetsOfUserAndCom::bet={}".format(row))
+            tmpdict = bet.__dict__
+            result.append(tmpdict)
 
         result.sort(key=lambda bet: bet["dateMatch"])
 

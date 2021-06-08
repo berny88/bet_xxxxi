@@ -9,6 +9,7 @@ print(sys.path)
 from front.front import front_end
 from back.users.UserServices import users_page
 from back.matchs.MatchServices import matchs_page
+from back.bets.BetsServices import bets_page
 from back.tools.Tools import tools_page
 
 
@@ -19,6 +20,7 @@ application.register_blueprint(front_end, url_prefix="/front", template_folder='
 application.register_blueprint(users_page, url_prefix="/back/users", template_folder='templates')
 application.register_blueprint(matchs_page, url_prefix="/back/matchs", template_folder='templates')
 application.register_blueprint(tools_page, url_prefix="/back/tools", template_folder='templates')
+application.register_blueprint(bets_page, url_prefix="/back/bets", template_folder='templates')
 
 
 print(sys.path)
