@@ -93,7 +93,7 @@ export default {
     },
     methods: {
         fetchData () {
-            if (this.$store.state.uid === undefined) {
+            if (this.$store.state.uid != "") {
                 this.error = this.post = null;
                 this.loading = true;            
                 var connect_attr={};
