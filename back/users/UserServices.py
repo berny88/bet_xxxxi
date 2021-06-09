@@ -346,10 +346,12 @@ class UserManager(DbManager):
                 usr.nickName=nickName
                 usr.validated=validated        
                 usr.user_id=user_id                
-                c.execute("""insert into BETUSER 
-                    (uuid, nickName, email,description, validated )
+                c.execute("""
+                    insert into BETUSER 
+                    (uuid, nickName, email, description, validated )
                     values
-                    ('{}', '{}','{}', '{}', '{}');""".format(user_id, nickName,email, description, validated))            
+                    (?, ?, ?, ?, ? );""", \
+                        (user_id, nickName, email, description,validated))            
             else:
                 logger.info(u'\t try update to user : {} '.format(usr.user_id))
                 usr.email=email
@@ -358,15 +360,14 @@ class UserManager(DbManager):
                 usr.validated=validated        
                 if (pwd != ""):
                     c.execute("""update BETUSER 
-                    set nickName='{}', email='{}',description='{}', validated='{}', hashedpwd='{}'
+                    set nickName=?, email=?,description=?, validated=?, hashedpwd=?
                     where
-                    uuid='{}'""".format(nickName,email, description, validated, self.hash_password(pwd), user_id))            
-
+                    uuid=?""", (nickName, email, description, validated, self.hash_password(pwd), user_id))            
                 else:
                     c.execute("""update BETUSER 
-                    set nickName='{}', email='{}',description='{}', validated='{}'
+                    set nickName=?, email=?,description=?, validated=?
                     where
-                    uuid='{}'""".format(nickName,email, description, validated, user_id))            
+                    uuid=%(user_id)s""", (nickName, email, description, validated, user_id))            
             
             localdb.commit()
             logger.info(u'saveUser::commit')

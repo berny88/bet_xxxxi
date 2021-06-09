@@ -46,9 +46,9 @@
                             <td > {{ p.category }}</td>
                             <td > {{ p.libteamA }}</td>
                             <td ><span class="newflags FRA"></span> </td>
-                            <td ><input style="width:50px;text-align:center;" 
+                            <td ><input style="width:50px;text-align:center;" type="number" min="0" max="20"
                                     :name="resultA" :id="resultA" v-model="p.resultA"></td>
-                            <td ><input style="width:50px;text-align:center;" 
+                            <td ><input style="width:50px;text-align:center;" type="number" min="0" max="20"
                                     :name="resultB" :id="resultB" v-model="p.resultB"></td>
                             <td ><span class="newflags GER"></span> </td>
                             <td > {{ p.libteamB }}</td>
@@ -65,8 +65,10 @@
                     <div v-if="msg" class="toast toast-success">
                     {{ msg }} <br/>
                     </div>
+                    <div v-if="this.$store.state.uid">
                 <button id="submit"  v-on:click="save()" class="btn btn-success">
                     Never forget to save !</button>
+                    </div>
 
             </div>
         </div>
@@ -112,7 +114,7 @@ export default {
                                 }
                 );
             }else{
-               this.error="please connect you before"; 
+               this.error="please connect you before - click on the Home link"; 
             }
             
         },

@@ -104,10 +104,10 @@ class BetsManager(DbManager):
             FROM GAME g, BETUSER u, BET b
             where  b.FK_GAME=g.key
             and b.FK_USER=u.uuid
-            and u.uuid='{}'
+            and u.uuid= :user_id
             order by g.date;"""
         cur = localdb.cursor()
-        cur.execute(sql_bets_by_user.format(user_id))
+        cur.execute(sql_bets_by_user, {'user_id':user_id})
         rows = cur.fetchall()
         logger.info("getBetsOfUserAndCom::rowcount=".format( cur.rowcount ))
         if len(rows) == 0:
@@ -119,11 +119,11 @@ class BetsManager(DbManager):
                 uuid = str(uuid4())
                 logger.info("getBetsOfUserAndCom::key={}".format(m['key']))
                 cur.execute("""insert into BET 
-                    (uuid, FK_GAME, FK_USER,nbPoints )
+                    (uuid, FK_GAME, FK_USER,nbPoints, resultA, resultB )
                     values
-                    ('{}', '{}','{}', '{}');""".format(uuid, m['key'],user_id, 0))            
+                    (?, ?, ?, 0, 0, 0);""", (uuid, m['key'], user_id))            
             localdb.commit()
-            cur.execute(sql_bets_by_user.format(user_id))
+            cur.execute(sql_bets_by_user, {'user_id':user_id})
             rows = cur.fetchall()
             logger.info("getBetsOfUserAndCom::reload bet::{}".format(len(rows)))
 
