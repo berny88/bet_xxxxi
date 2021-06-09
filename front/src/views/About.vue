@@ -12,7 +12,39 @@ export default {
 
 <template>
   <div class="about">
-    <h1>This is an about page</h1>
     <Hello/>
+    <div class="empty">
+      <h2 class="lead">Principles : </h2>
+      <ul>
+        <li>Entering bets up to 2 hours before the start of matches</li>
+        <li>At the end of each match, results are recorded by the administrator and each participant's points are calculated and ranked.</li>
+        <li>The bets of all the bettors in a community will only be visible once the bets are closed.</li>
+        <li>The spirit of the calculation of the points is to leave a "certain" part to the random to leave all its chances to each one, connoisseur or not</li>
+      </ul>
+    </div>
+  <div class="empty">
+    <h2 class="lead">Calculation of points</h2>
+    <ul>
+      <li>If the bettor has found the winner (or guessed a draw): 5 points</li>
+      <li>3 points if the bettor has guessed the number of points of a team</li>
+      <li>2 points if the bettor guessed the good difference of points between the 2 teams (no matter the winner)</li>
+      <li>Therefore, for each match, a bettor can collect 5 + 6 + 2 points = 13 points if he guesses the exact result of the match.</li>
+      <li style="color:red;">Achtung : for the final phase, the score <b> at the end of extra time </b> (if any) will be taken into account (penalties are not counted). There may therefore be draws.</li>
+    </ul>
   </div>
+  <div class="empty">
+    <h2 class="lead">Rankings (for each community)</h2>
+    <ul>
+      <li>A classification will be made for the group stages</li>
+      <li>A classification will be made for the knockout phases</li>
+      <li>A ranking will be carried out on the whole competition</li>
+    </ul>
+  </div>
+  <div class="empty">
+    <h2 class="lead">Appeals</h2>
+    <ul>
+      <li>No appeal will be accepted (dura lex, sed lex)</li>
+    </ul>
+  </div>
+    </div>
 </template>

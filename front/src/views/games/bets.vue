@@ -55,8 +55,19 @@
                         </tr>
                     </tbody>
                 </table>
+                    <div v-if="loading" class="loading">
+                    Loading...
+                    </div>
+
+                    <div v-if="error" class="error">
+                    {{ error }}
+                    </div>
+                    <div v-if="msg" class="toast toast-success">
+                    {{ msg }} <br/>
+                    </div>
                 <button id="submit"  v-on:click="save()" class="btn btn-success">
                     Never forget to save !</button>
+
             </div>
         </div>
 </template>
