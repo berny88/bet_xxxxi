@@ -93,23 +93,27 @@ export default {
     },
     methods: {
         fetchData () {
-            this.error = this.post = null;
-            this.loading = true;
-            var connect_attr={};
-            console.info("load bets for ", this.$store.state.uid);
-            axios({ method: "GET", "url": "back/matchs/apiv1.0/matchs/"+ this.$store.state.uid +"/bets", 
-                    "data": {connect: connect_attr}, 
-                    "headers": { "content-type": "application/json" } }).then(result => {
-                            //{"category":"GRPA","date":"2021/06/11 21:00:00","key":"GRPA-TURITA","libteamA":"Turkey","libteamB":"Italia","resultA":null,"resultB":null,"teamA":"TUR","teamB":"ITA"}
-                            this.games = result.data.bets;
-                            this.loading = false;
-                            
-                            }, error => {
-                                console.error(error);
-                                this.errormsg=error;
-                                this.error = error.toString();
-                            }
-            );
+            if (this.$store.state.uid === undefined) {
+                this.error = this.post = null;
+                this.loading = true;            
+                var connect_attr={};
+                console.info("load bets for ", this.$store.state.uid);
+                axios({ method: "GET", "url": "back/matchs/apiv1.0/matchs/"+ this.$store.state.uid +"/bets", 
+                        "data": {connect: connect_attr}, 
+                        "headers": { "content-type": "application/json" } }).then(result => {
+                                //{"category":"GRPA","date":"2021/06/11 21:00:00","key":"GRPA-TURITA","libteamA":"Turkey","libteamB":"Italia","resultA":null,"resultB":null,"teamA":"TUR","teamB":"ITA"}
+                                this.games = result.data.bets;
+                                this.loading = false;
+                                
+                                }, error => {
+                                    console.error(error);
+                                    this.errormsg=error;
+                                    this.error = error.toString();
+                                }
+                );
+            }else{
+               this.error="please connect you before"; 
+            }
             
         },
         save () {
