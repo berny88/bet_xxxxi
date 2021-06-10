@@ -1,7 +1,7 @@
 # -*- coding: utf-8 -*-
 import logging
 
-from datetime import datetime
+from datetime import datetime, timedelta
 from flask import Blueprint, jsonify
 from uuid import uuid4
 import sqlite3
@@ -64,6 +64,8 @@ class Bet(BetProjectClass):
         self.teamA = u""
         self.teamB = u""
         self.nbPoints = 0
+        self.dateGameInDate=datetime.now
+        self.blocked=False
 
     def convertFromBson(self, elt):
         """
@@ -133,6 +135,14 @@ class BetsManager(DbManager):
             bet.user_id=row["uuid"]
             bet.game_id=row["key"]
             bet.dateMatch=row["date"]
+            #2021/06/11 21:00:00
+            bet.dateGameInDate=datetime.strptime(row["date"], self.DATE_FORMAT)
+            currDate = datetime.now()
+            dateToCompare = bet.dateGameInDate - timedelta(hours=2)
+            if (dateToCompare<currDate):
+                bet.blocked=True
+            else:
+                bet.blocked=False
             bet.resultA=row["resultA"]
             bet.resultB=row["resultB"]
             bet.libteamA = row["libteamA"]
@@ -159,14 +169,18 @@ class BetsManager(DbManager):
         """
         nbHit = 0
         for b in bets:
-            currDate = datetime.utcnow()
-            logger.warn(u'\ttry save : b={}\n'.format(b))
-            logger.info(u'\t\t****** CtrlDateFront - currDate : {}'.format(currDate))
-            if b["user_id"]==user_id :
-                self.createOrUpdate(b)
-                nbHit = nbHit + 1
+            currDate = datetime.now()
+            dateToCompare = datetime.strptime(b["dateMatch"], self.DATE_FORMAT) - timedelta(hours=2)
+            logger.warn(u'\tcreateOrUpdateBets::try save : b={}\n'.format(b))
+            logger.info(u'\t\t****** CtrlDateFront - currDate : {}/{}'.format(currDate, dateToCompare))
+            if dateToCompare>currDate :
+                if b["user_id"]==user_id :
+                    self.createOrUpdate(b)
+                    nbHit = nbHit + 1
+                else:
+                    logger.warn(u'\tcreateOrUpdateBets::pas le bon user: {}\n'.format(b))
             else:
-                logger.warn(u'\tdate limite dépassée, on n\'enregistre pas : {}\n'.format(b))
+                logger.warn(u'\tcreateOrUpdateBets::date limite dépassée, on n\'enregistre pas : {}\n'.format(b))
         return nbHit
 
     def createOrUpdate(self, bet):
@@ -187,7 +201,7 @@ class BetsManager(DbManager):
                       
         except sqlite3.Error as e:
             logger.error(e)
-            logger.info(u'\tid : {}'.format(user_id))
+            logger.info(u'\tid : {}'.format(bet))
             localdb.rollback()
             logger.info(u'createOrUpdate::rollback')
             return False

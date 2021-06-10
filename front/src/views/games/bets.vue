@@ -46,9 +46,17 @@
                             <td > {{ p.category }}</td>
                             <td > {{ p.libteamA }}</td>
                             <td ><span class="newflags FRA"></span> </td>
-                            <td ><input style="width:50px;text-align:center;" type="number" min="0" max="20"
+                            <td v-if="p.blocked===false">
+                                <input style="width:50px;text-align:center;" type="number" min="0" max="20"
                                     :name="resultA" :id="resultA" v-model="p.resultA"></td>
-                            <td ><input style="width:50px;text-align:center;" type="number" min="0" max="20"
+                            <td v-if="p.blocked===true">
+                                <input style="width:50px;text-align:center;" type="number" min="0" max="20" disabled
+                                    :name="resultA" :id="resultA" v-model="p.resultA"></td>
+                            <td v-if="p.blocked===false">
+                                <input style="width:50px;text-align:center;" type="number" min="0" max="20"
+                                    :name="resultB" :id="resultB" v-model="p.resultB"></td>
+                            <td v-if="p.blocked===true">
+                                <input style="width:50px;text-align:center;" type="number" min="0" max="20" disabled
                                     :name="resultB" :id="resultB" v-model="p.resultB"></td>
                             <td ><span class="newflags GER"></span> </td>
                             <td > {{ p.libteamB }}</td>
@@ -106,6 +114,7 @@ export default {
                                 //{"category":"GRPA","date":"2021/06/11 21:00:00","key":"GRPA-TURITA","libteamA":"Turkey","libteamB":"Italia","resultA":null,"resultB":null,"teamA":"TUR","teamB":"ITA"}
                                 this.games = result.data.bets;
                                 this.loading = false;
+                                console.info("games", this.games);
                                 
                                 }, error => {
                                     console.error(error);
