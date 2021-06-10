@@ -34,7 +34,7 @@ def updateMatchsResults():
     only allowed to admin
     :return the numbers of matchs updated
     """
-    logger.info("updateMatchsResults::{}".format(request.json["matchs"]))
+    logger.info("updateMatchsResults::{}".format(request.json["connect"]))
     if "no_save" in request.json:
         no_save=request.json["no_save"]
     else:
@@ -42,7 +42,7 @@ def updateMatchsResults():
     logger.info("updateMatchsResults::no_save={}".format(no_save))
     if "cookieUserKey" in session:
         mgr = MatchsManager()
-        matchsjson = request.json["matchs"]
+        matchsjson = request.json["connect"]
         cookieUserKey = session['cookieUserKey']
         user_mgr = UserManager()
         user = user_mgr.getUserByUserId(cookieUserKey)

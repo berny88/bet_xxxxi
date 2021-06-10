@@ -309,7 +309,7 @@ class UserManager(DbManager):
         """uuid, nickName, desc, avatar, email, isAdmin"""
 
         sql_all_tab="""SELECT uuid, nickName, description, avatar, email, isAdmin, validated
-                        FROM BETUSER order by nickName;"""
+                        FROM BETUSER order by nickName COLLATE NOCASE ASC;"""
         #localdb.row_factory = self.dict_factory
         logger.info(u'getAllUsers::row_factory={}'.format(localdb.row_factory))
         cur = localdb.cursor()
@@ -367,7 +367,7 @@ class UserManager(DbManager):
                     c.execute("""update BETUSER 
                     set nickName=?, email=?,description=?, validated=?
                     where
-                    uuid=%(user_id)s""", (nickName, email, description, validated, user_id))            
+                    uuid=?""", (nickName, email, description, validated, user_id))            
             
             localdb.commit()
             logger.info(u'saveUser::commit')

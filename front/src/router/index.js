@@ -8,6 +8,8 @@ import Signon from '../views/logon.vue'
 import Games from '../views/games/games.vue'
 import Ranking from '../views/games/ranking.vue'
 import Bets from '../views/games/bets.vue'
+import AdminGames from '../views/games/admin_games.vue'
+import AdminUsers from '../views/admin_users.vue'
 
 Vue.use(VueRouter)
 
@@ -31,6 +33,16 @@ const routes = [
     path: '/games',
     name: 'Games',
     component: Games
+  },
+  {
+    path: '/admin_games',
+    name: 'AdminGames',
+    component: AdminGames
+  },
+  {
+    path: '/admin_users',
+    name: 'AdminUsers',
+    component: AdminUsers
   },
   {
     path: '/bets',

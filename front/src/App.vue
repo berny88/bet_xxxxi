@@ -11,7 +11,7 @@
                 <li><router-link to="/" class="btn btn-link">Home</router-link> </li>
                 <li><router-link to="/bets" class="btn btn-link">Bets</router-link> </li>
                 <li><router-link to="/games" class="btn btn-link">Games</router-link> </li>
-                <li><router-link to="/users" class="btn btn-link">Betors</router-link> </li>
+                <li><router-link to="/users" class="btn btn-link">Bettors</router-link> </li>
                 <li><router-link to="/ranking" class="btn btn-link">Ranking</router-link> </li>
                 <li><router-link to="/about" class="btn btn-link">About</router-link></li>
               </ul>
