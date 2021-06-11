@@ -159,6 +159,46 @@ class BetsManager(DbManager):
 
         return result
 
+    def getBetsOfGame(self, game_key):
+        logger.info("getBetsOfGame::START")
+        localdb = self.getDb()
+        result = list()
+        # get all bets+games+user attrb
+        sql_bets_by_user="""
+            SELECT category, key, date, libteamA, teamA, libteamB, teamB,
+            u.uuid, b.resultA, b.resultB, nbPoints, b.uuid as bet_uuid
+            FROM GAME g, BETUSER u, BET b
+            where  b.FK_GAME=g.key
+            and b.FK_USER=u.uuid
+            and b.FK_GAME= :fk_game
+            order by g.date;"""
+        cur = localdb.cursor()
+        cur.execute(sql_bets_by_user, {'fk_game':game_key})
+        rows = cur.fetchall()
+        logger.info("getBetsOfGame::rowcount=".format( len(rows) ))
+
+        for row in rows:
+            bet = Bet()
+            bet.bet_uuid=row["bet_uuid"]
+            bet.user_id=row["uuid"]
+            bet.game_id=row["key"]
+            bet.dateMatch=row["date"]
+            #2021/06/11 21:00:00
+            bet.dateGameInDate=datetime.strptime(row["date"], self.DATE_FORMAT)
+            bet.resultA=row["resultA"]
+            bet.resultB=row["resultB"]
+            bet.libteamA = row["libteamA"]
+            bet.libteamB = row["libteamB"]
+            bet.teamA = row["teamA"]
+            bet.teamB = row["teamB"]
+            bet.nbPoints = row["nbPoints"]
+
+            logger.info("getBetsOfGame::bet={}".format(row))
+            result.append(bet)
+
+        
+        return result
+
     def createOrUpdateBets(self, user_id, bets):
         u"""
         update a list af bet for user in a community
@@ -211,23 +251,30 @@ class BetsManager(DbManager):
 
     def saveScore(self, bet):
         u"""
-        store just the score of a bet, and eventually the state "closed" or not of a bet.
+        store just nb points.
         :param bet: the bet to create or update
         :return: the bet (i'm sure if it is good idea)
         """
-        bsonBet = self.getDb().bets.find_one({"user_id": bet.user_id, "com_id": bet.com_id,
-                                              "key": bet.key})
-        if bsonBet is None:
+        logger.info(u'saveScore:: {}'.format(bet))
+        betuui = bet.bet_uuid
+        if betuui is None:
             logger.info(u"\t\tERROR - bet not found")
         else:
-            currDate = datetime.utcnow()
-            if datetime.strptime(bet.dateMatch, "%Y-%m-%dT%H:%M:%SZ") < currDate:
-                logger.warn(u'\tdate limite dépassée !')
-                self.getDb().bets.update({"_id": bsonBet["_id"]},
-                                         {"$set": {"nbpoints": bet.nbpoints, "notClosed" : False}}, upsert=True)
-            else:
-                self.getDb().bets.update({"_id": bsonBet["_id"]},
-                                         {"$set": {"nbpoints": bet.nbpoints, "notClosed" : True}}, upsert=True)
+            try:
+                localdb=self.getDb()
+                c = localdb.cursor()
+                c.execute("""update BET 
+                            set nbPoints=?
+                            where
+                            uuid=?""", (bet.nbPoints, bet.bet_uuid))  
+                localdb.commit()
+                        
+            except sqlite3.Error as e:
+                logger.error(e)
+                logger.info(u'\tid : {}'.format(bet))
+                localdb.rollback()
+                logger.info(u'createOrUpdate::rollback')
+                return None
         return bet
 
     def delete(self, bet):
