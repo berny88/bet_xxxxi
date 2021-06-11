@@ -58,7 +58,7 @@
         methods: {
             getUsers() {
                 var connect_attr={};
-                axios({ method: "GET", "url": "back/users/apiv1.0/users", 
+                axios({ method: "GET", "url": "back/users/apiv1.0/users/admin", 
                     "data": {connect: connect_attr}, 
                     "headers": { "content-type": "application/json" } }).then(result => {
                                     this.betors = result.data.users;

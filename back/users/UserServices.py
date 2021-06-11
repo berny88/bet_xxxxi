@@ -33,12 +33,36 @@ def getInitDB():
 def getusers():
     u"""
     return the complete list of users sorted by nickName and eventually filtered by 'validated'
+    without transfered the uuid + email
     :return: collection of users in jso format
     """
     filterValidated=request.args.get('validated')
     mgr = UserManager()
     users = mgr.getAllUsers(filterValidated)
+    for u in users:
+        u["email"]=""
+        u["uuid"]=""
+
     logger.info("getusers::users={}".format(users))
+    return jsonify({'users': users})
+
+@users_page.route('/apiv1.0/users/admin', methods=['GET'])
+def getUsersForAdmin():
+    u"""
+    return the complete list of users sorted by nickName and eventually filtered by 'validated'
+    without transfered the uuid + email
+    :return: collection of users in jso format
+    """
+    filterValidated=request.args.get('validated')
+    cookieUserKey = session['cookieUserKey']
+    user_mgr = UserManager()
+    user = user_mgr.getUserByUserId(cookieUserKey)
+    users=list()
+    if user.isAdmin:
+        mgr = UserManager()
+        users = mgr.getAllUsers(filterValidated)
+
+        logger.info("getusers::users={}".format(users))
     return jsonify({'users': users})
 
 
