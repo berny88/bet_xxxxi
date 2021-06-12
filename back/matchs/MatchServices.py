@@ -29,6 +29,14 @@ def getMatchs():
 
     return jsonify({'matchs': matchs})
 
+@matchs_page.route('/apiv1.0/matchs/ranking', methods=['GET'])
+def getRankings():
+    mgr = MatchsManager()
+    rankings=mgr.getAllRanking()
+    logger.info(">>{}".format(jsonify({'rankings': rankings}).data))
+
+    return jsonify({'rankings': rankings})
+
 @matchs_page.route('/apiv1.0/matchs', methods=['PUT'])
 def updateMatchsResults():
     u"""
@@ -278,6 +286,32 @@ class MatchsManager(DbManager):
 
         return None
 
+    def getAllRanking(self):
+        """
+        get the complete list of matchs
+        """
+        localdb = self.getDb()
+
+        """uuid, nickName, desc, avatar, email, isAdmin"""
+
+        sql_all_ranking="""select g.date, g.libteamA as game_ta, g.resultA  as result_ta, 
+                         g.libteamB as game_tb, g.resultB as result_tb, 
+                         u.nickName , b.resultA, b.resultB, nbPoints
+                        from BETUSER u, game g, BET b
+                        where u.uuid=b.FK_USER
+                        and b.FK_GAME=g.key
+                        and g.resultA is not null
+                        and g.resultB is not NULL
+                        order by g.date desc, nbPoints DESC;"""
+        cur = localdb.cursor()
+        cur.execute(sql_all_ranking)
+
+        rows = cur.fetchall()
+        result = list()
+        for row in rows:
+            result.append(row)                    
+            logger.info("getAllRanking::bet_result={}".format(row))
+        return result
     
 
 

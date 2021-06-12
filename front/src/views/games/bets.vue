@@ -1,5 +1,5 @@
 <template>
-        <div class="container grid-xs">
+        <div class="container  col-12">
 
             <h1><center>Your bets</center></h1>
     <div v-if="loading" class="loading">
@@ -13,7 +13,6 @@
       {{ msg }} <br/>
     </div>
 
-    <div class="col-xs-12">
 
                 <table class="table  table-striped table-hover">
                     <thead>
@@ -79,7 +78,6 @@
                     </div>
 
             </div>
-        </div>
 </template>
 <script>
     import axios from "axios";

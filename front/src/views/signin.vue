@@ -19,7 +19,6 @@
             <button id="submit"  v-on:click="login()" class="btn btn-success">
               Login to your account !</button>
             &nbsp;
-            <router-link to="/" class="btn btn-error" >Back</router-link>
           <br/>
           <!--<a class="btn btn-default disabled" href="#signon">No account yet ?</a> Inscriptions closed for this event !-->
           <router-link to="signon" class="btn btn-error" >No account yet ?</router-link>
