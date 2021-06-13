@@ -50,12 +50,14 @@
                 <table class="table  table-striped table-hover">
                     <thead>
                         <tr>
+                            <th>Rank</th>
                             <th>Nickname</th>
                             <th>nbPoints</th>
                         </tr>
                     </thead>
                     <tbody id="v-for-object">
                         <tr v-for="p in globalRankings" :key="p.nickName">
+                            <td > {{ p.rank }}</td>
                             <td > {{ p.nickName }}</td>
                             <td > {{ p.cumul }}</td>
                         </tr>

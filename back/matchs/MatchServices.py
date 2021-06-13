@@ -341,9 +341,12 @@ class MatchsManager(DbManager):
 
         rows = cur.fetchall()
         result = list()
+        i=1
         for row in rows:
+            row["rank"]=i
             result.append(row)                    
             logger.info("getGlobalRankings::bet_result={}".format(row))
+            i=i+1
         return result
 
 
