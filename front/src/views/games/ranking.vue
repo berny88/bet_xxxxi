@@ -9,8 +9,13 @@
             <div v-if="error" class="error">
             {{ error }}
             </div>
+        <div class="btn-group btn-group-block">
+            <button class="btn" v-on:click="activePanel = 'global'">Global Ranking</button>
+            <button class="btn" v-on:click="activePanel = 'byGame'">Ranking game by game</button>
+        </div> 
 
-<!--date, game_ta, result_ta, game_tb, result_tb,nickName , resultA, resultB, nbPoints-->
+            <div v-if="activePanel==='byGame'" class="error">
+                <!--date, game_ta, result_ta, game_tb, result_tb,nickName , resultA, resultB, nbPoints-->
                 <table class="table  table-striped table-hover">
                     <thead>
                         <tr>
@@ -39,7 +44,24 @@
                         </tr>
                     </tbody>
                 </table>
-
+            </div>
+            <div v-if="activePanel==='global'" class="error">
+                <!--date, game_ta, result_ta, game_tb, result_tb,nickName , resultA, resultB, nbPoints-->
+                <table class="table  table-striped table-hover">
+                    <thead>
+                        <tr>
+                            <th>Nickname</th>
+                            <th>nbPoints</th>
+                        </tr>
+                    </thead>
+                    <tbody id="v-for-object">
+                        <tr v-for="p in globalRankings" :key="p.nickName">
+                            <td > {{ p.nickName }}</td>
+                            <td > {{ p.cumul }}</td>
+                        </tr>
+                    </tbody>
+                </table>
+            </div>
         </div>
 </template>
 <script>
@@ -50,7 +72,9 @@ export default {
         return {
         loading: false,
         rankings: [{ title: 'Foo' }, { title: 'Bar' }],
-        error: null
+        globalRankings: [{ title: 'Foo' }, { title: 'Bar' }],
+        error: null,
+        activePanel:"global"
         }
     },
     created () {
@@ -63,6 +87,9 @@ export default {
         '$route': 'fetchData'
     },
     methods: {
+        switchPanel (name) {
+            this.activePanel=name;
+        },
         fetchData () {
             this.error = this.post = null;
             this.loading = true;
@@ -76,6 +103,21 @@ export default {
                             this.rankings = result.data.rankings;
                             this.loading = false;
                             console.info("rankings", this.rankings)
+                            }, error => {
+                                console.error(error);
+                                this.errormsg=error;
+                                this.error = error.toString();
+                            }
+            );
+            axios({ method: "GET", "url": "back/matchs/apiv1.0/matchs/global_rankings", 
+                    "data": {connect: connect_attr}, 
+                    "headers": { "content-type": "application/json" } }).then(result => {
+                        //date, game_ta, result_ta, 
+                        //game_tb, result_tb, 
+                        //nickName , resultA, resultB, nbPoints
+                            this.globalRankings = result.data.globalRankings;
+                            this.loading = false;
+                            console.info("globalRankings", this.globalRankings)
                             }, error => {
                                 console.error(error);
                                 this.errormsg=error;

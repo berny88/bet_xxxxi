@@ -11,7 +11,6 @@
       {{ error }}
     </div>
 
-
         <div class="col-xs-12">
 
             <table class="table  table-striped table-hover">

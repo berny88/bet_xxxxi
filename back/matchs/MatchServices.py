@@ -37,6 +37,15 @@ def getRankings():
 
     return jsonify({'rankings': rankings})
 
+@matchs_page.route('/apiv1.0/matchs/global_rankings', methods=['GET'])
+def getGlobalRankings():
+    mgr = MatchsManager()
+    globalRankings=mgr.getGlobalRankings()
+    logger.info(">>{}".format(jsonify({'globalRankings': globalRankings}).data))
+
+    return jsonify({'globalRankings': globalRankings})
+
+
 @matchs_page.route('/apiv1.0/matchs', methods=['PUT'])
 def updateMatchsResults():
     u"""
@@ -313,6 +322,29 @@ class MatchsManager(DbManager):
             logger.info("getAllRanking::bet_result={}".format(row))
         return result
     
+
+    def getGlobalRankings(self):
+        """
+        get the complete list of matchs
+        """
+        localdb = self.getDb()
+
+        """uuid, nickName, desc, avatar, email, isAdmin"""
+
+        sql_global_ranking="""select u.nickName , sum(nbPoints) as cumul
+                            from BETUSER u, BET b
+                            where u.uuid=b.FK_USER
+                            group by nickName
+                            order by 2 desc;"""
+        cur = localdb.cursor()
+        cur.execute(sql_global_ranking)
+
+        rows = cur.fetchall()
+        result = list()
+        for row in rows:
+            result.append(row)                    
+            logger.info("getGlobalRankings::bet_result={}".format(row))
+        return result
 
 
 

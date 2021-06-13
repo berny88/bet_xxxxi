@@ -15,36 +15,22 @@
                 <table class="table  table-striped table-hover">
                     <thead>
                         <tr>
-                            <th >
-                                Date                                
-                            </th>
-                            <th>
-                                Group                                
-                            </th>
-                            <th>
-                               Team A
-                               </th>
-                            <th>
-                            </th>
-                            <th>
-                            </th>
-                            <th>
-                            </th>
-                            <th>
-                            </th>
-                            <th>
-                                Team B
-                            </th>
+                            <th >Date</th>
+                            <th>Team A</th>
+                            <th></th>
+                            <th></th>
+                            <th></th>
+                            <th></th>
+                            <th>Team B</th>
                         </tr>
                     </thead>
                     <tbody id="v-for-object">
                         <tr v-for="p in games" :key="p.key">
                             <td > {{ p.date }}</td>
-                            <td > {{ p.category }}</td>
                             <td > {{ p.libteamA }}</td>
                             <td ><span class="newflags FRA"></span> </td>
-                            <td ><input style="width:50px;text-align:center;" value="" disabled></td>
-                            <td ><input style="width:50px;text-align:center;" value="" disabled></td>
+                            <td ><input style="width:50px;text-align:center;" v-model="p.resultA" disabled></td>
+                            <td ><input style="width:50px;text-align:center;" v-model="p.resultB" disabled></td>
                             <td ><span class="newflags GER"></span> </td>
                             <td > {{ p.libteamB }}</td>
                         </tr>
