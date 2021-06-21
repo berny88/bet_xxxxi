@@ -1,21 +1,8 @@
-# front
+# vue-upload-image-axios
 
 ## Project setup
 ```
-cd front
-vue cli add
-npm install axios --save
-
-vue create vue-upload-files
-
-vue create vue-upload-image-axios
-```
-
-You will see some options, choose default (babel, eslint).
-Then we add Axios library with command: 
-
-```
-npm install axios
+npm install
 ```
 
 ### Compiles and hot-reloads for development

@@ -241,7 +241,7 @@ class MatchsManager(DbManager):
 
         sql_all_games="""SELECT category, key, date, libteamA, teamA, libteamB, teamB,
             resultA, resultB
-                        FROM GAME order by date;"""
+                        FROM GAME order by date, key;"""
         cur = localdb.cursor()
         cur.execute(sql_all_games)
 
@@ -311,7 +311,7 @@ class MatchsManager(DbManager):
                         and b.FK_GAME=g.key
                         and g.resultA is not null
                         and g.resultB is not NULL
-                        order by g.date desc, nbPoints DESC;"""
+                        order by g.date desc, nbPoints DESC, u.nickName COLLATE NOCASE ASC;"""
         cur = localdb.cursor()
         cur.execute(sql_all_ranking)
 

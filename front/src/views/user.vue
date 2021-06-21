@@ -14,6 +14,11 @@
     </div>
 
        <div class="form-group">
+           <figure class="avatar avatar-xl" style="background-color: #5755d9;">
+               <!-- /apiv1.0/users/<user_id>/avatar-->
+                <img :src="'/back/users/apiv1.0/users/' + this.$route.params.uid+'/avatar'">
+           </figure>
+
             <div class="form-group">
               <label for="email" class="form-label">Email</label>
               <input type="email" class="form-input" id="email" v-model="user.email"
@@ -39,20 +44,31 @@
             &nbsp;
             <router-link to="/" class="btn btn-error" >Back</router-link>
           <br/>
+       </div>
+        <div class="toast">
+                <div class="tile-content">
+                    <p class="tile-title">Change your avatar</p>
+                    <p class="tile-title">Achtung : square file in jpg format and size less than 500 Ko</p>
+                </div>
+                <div class="tile-action">
+                    <input type="file" id="avatar" file-model="myAvatar" accept="image/jpeg,image/png" required="required">
+                    <button id="saveAvatar" class="btn btn-sucess" v-on:click="saveAvatar()" >Save Avatar</button>
+                </div>
+            
         </div>
     </div>
-
 </template>
 
 <script>
     import axios from "axios";
-
+    
    export default {
         data() {
             return {
                 user: {'email':'', 'thepwd':'', 'description':'', 'nickName':''},
                 error:"",
-                msg:""
+                msg:"",
+                currentImage: undefined
             }
         },
         created () {
@@ -102,6 +118,26 @@
                                         this.error=error;
                                     }
                                     );
+            },
+            saveAvatar( ) {
+                var formData = new FormData();
+                var imagefile = document.querySelector('#avatar');
+                formData.append("file", imagefile.files[0]);
+                let uid = this.$route.params.uid
+                console.info("file", formData)
+                axios({ method: "POST", "url": "back/users/apiv1.0/users/"+uid+"/avatar", 
+                    data: formData, 
+                    "headers": { 'Content-Type': 'multipart/form-data'} }
+                    ).then(result => {
+                                    this.user = result.data.user;                                    
+                                    console.info("user.vue-user", this.user);
+                                    this.msg="Successful"
+                                    }, error => {
+                                        console.error("error", error);
+                                        this.error=error;
+                                    }
+                    );
+                
             }
         }
     }

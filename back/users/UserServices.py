@@ -1,5 +1,6 @@
 # -*- coding: utf-8 -*-
 from flask import Blueprint, jsonify, redirect, request, session
+import os
 import logging
 from uuid import uuid4
 
@@ -18,6 +19,8 @@ u"""
 **************************************************
 ui layer
 """
+
+uploads_dir = os.path.join("../dist", 'dbimg')
 
 users_page = Blueprint('users_page', __name__,
                        template_folder='templates', static_folder='static')
@@ -203,7 +206,7 @@ def login():
 # For a given file, return whether it's an allowed type or not
 def allowed_file_type(filename):
     return '.' in filename and \
-           filename.rsplit('.', 1)[1] in set(['jpg','jpeg','JPG', 'JPEG'])
+           filename.rsplit('.', 1)[1] in set(['jpg','jpeg','JPG', 'JPEG', 'png', 'PNG'])
 
 @users_page.route('/apiv1.0/users/<user_id>/avatar', methods=['POST'])
 def saveAvatar(user_id):
@@ -221,24 +224,37 @@ def saveAvatar(user_id):
         userFromCookie = mgr.getUserByUserId(cookieUserKey)
         if (userFromCookie.isAdmin):
             checkRight=True
+    logger.info("saveAvatar::request={}".format(request))
+
     if (checkRight):
         # Get the name of the uploaded file
+        logger.info("saveAvatar::checkRight")
         file = request.files['file']
         # Check if the file is one of the allowed types/extensions
         if file and allowed_file_type(file.filename):
 
-            data = file.read()
-            file.close()
-
+            length = file.content_length
+            logger.info("saveAvatar::len(data)={}".format(length))
+            
             # check the length (500Ko max)
-            if len(data) < 500000:
+            if length < 500000:
                 mgr = UserManager()
-                avatarId = mgr.saveAvatar(user_id, data)
+                #avatarId = mgr.saveAvatar(user_id, file)
+                """ save an avatar in DB"""
+                #write in File system
+                logger.info("saveAvatar::write into ./dbimg/{}".format(user_id))
+                logger.info("saveAvatar::pwd={}".format(os.getcwd()))
+                logger.info("saveAvatar::file.filename={}".format(file.filename))
+                logger.info("saveAvatar:isDir {} ? ={}".format(uploads_dir, os.path.isdir(uploads_dir)) )
+                logger.info("saveAvatar::content_length={}".format(file.content_length))
+
+                file.save(os.path.join(uploads_dir, user_id))
+                file.close()
                 return "Yes !", 200
             else:
                 return "Size of the file ("+str(len(data))+" ko) more than 500 Ko", 415
         else:
-            return "Non supported file (jpg/jpeg mandatory)", 413
+            return "Non supported file (jpg/jpeg/png mandatory)", 413
     else:
         return "Ha ha ha ! Mais t'es pas la bonne personne pour faire ça, mon loulou", 403
 
@@ -250,13 +266,13 @@ def getAvatar(user_id):
     :param user_id: uuid
     :return: the avatar
     """
-    mgr = UserManager()
-    avatar = mgr.getAvatar(user_id)
-
-    if avatar is None:
-        return send_file('static/img/avatar/default_avatar.png',mimetype='image/png');
+    logger.info(uploads_dir+"/"+user_id)
+    logger.info("saveAvatar::pwd={}".format(os.getcwd()))
+    logger.info("saveAvatar::uploads_dir={}".format(uploads_dir))
+    if (os.path.isfile(uploads_dir+"/"+user_id)):
+        return send_file(uploads_dir+"/"+user_id,mimetype='image/png')
     else:
-        return send_file(io.BytesIO(avatar),mimetype='image/jpg', cache_timeout=0, add_etags=True)
+        return send_file(uploads_dir+"/default_avatar.png",mimetype='image/png')
 
 """
 users_page= remove cookieUserKey
@@ -468,23 +484,13 @@ class UserManager(DbManager):
         
     def saveAvatar(self,user_id, file):
         """ save an avatar in DB"""
+        #write in File system
+        logger.info("saveAvatar::write into ./dbimg/{}".format(user_id))
+        logger.info("saveAvatar::pwd={}".format(os.getcwd()))
+        logger.info("saveAvatar::uploads_dir={}".format(uploads_dir))
+        logger.info("saveAvatar:isDir {} ? ={}".format(uploads_dir, os.path.isdir(uploads_dir)) )
 
-        localdb = self.getDb()
-
-        avatarFromDB = localdb.avatars.find_one({"avatar_user_id": user_id})
-
-        if avatarFromDB is None:
-            bsonAvatar =dict()
-            bsonAvatar["avatar_user_id"]=user_id
-            bsonAvatar["file"] = Binary(file,0)
-            #logger.info(u'\t**** CREATION : {}'.format(bsonAvatar))
-            logger.info(u'\t**** CREATION ****')
-            localdb.avatars.insert_one(bsonAvatar)
-        else:
-            #logger.info(u'\t**** UPDATE : {}'.format(avatarFromDB))
-            logger.info(u'\t**** UPDATE ****')
-            localdb.avatars.update({"_id":avatarFromDB["_id"]},
-                                            {"$set":{"file":Binary(file,0)}}, upsert=True)
+        file.save(os.path.join(uploads_dir, user_id))
         return user_id
 
     def getAvatar(self,user_id):
