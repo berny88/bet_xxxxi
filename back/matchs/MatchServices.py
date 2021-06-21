@@ -311,7 +311,7 @@ class MatchsManager(DbManager):
                         and b.FK_GAME=g.key
                         and g.resultA is not null
                         and g.resultB is not NULL
-                        order by g.date desc, nbPoints DESC, u.nickName COLLATE NOCASE ASC;"""
+                        order by g.date desc, g.libteamA asc, nbPoints DESC, u.nickName COLLATE NOCASE ASC;"""
         cur = localdb.cursor()
         cur.execute(sql_all_ranking)
 
