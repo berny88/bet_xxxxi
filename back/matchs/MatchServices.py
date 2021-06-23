@@ -331,7 +331,7 @@ class MatchsManager(DbManager):
 
         """uuid, nickName, desc, avatar, email, isAdmin"""
 
-        sql_global_ranking="""select u.nickName , sum(nbPoints) as cumul
+        sql_global_ranking="""select u.uuid, u.nickName , sum(nbPoints) as cumul
                             from BETUSER u, BET b
                             where u.uuid=b.FK_USER
                             group by nickName

@@ -25,7 +25,12 @@
                 </thead>
                 <tbody >
                     <tr v-for="b in betors" :key="b.uuid">
-                        <td>avatar coming soon</td>
+                        <td>
+                            <figure class="avatar avatar-xl" style="background-color: #5755d9;">
+                           <!-- /apiv1.0/users/<user_id>/avatar-->
+                               <img v-bind:src="b.imgurl" alt="{{ b.nickName }}">
+                            </figure>
+                        </td>
                         <td>{{ b.nickName }} </td>
                         <td>{{ b.description }}</td>
                         <td></td>                            
@@ -39,6 +44,7 @@
 <script>
     import axios from "axios";
 
+   
    export default {
         data() {
             return {
@@ -62,6 +68,9 @@
                     "data": {connect: connect_attr}, 
                     "headers": { "content-type": "application/json" } }).then(result => {
                                     this.betors = result.data.users;
+                                    for (let i = 0; i < this.betors.length; i++) {
+                                        this.betors[i].imgurl = "/back/users/apiv1.0/users/" + this.betors[i].uuid+"/avatar";
+                                    }
                                     console.info(this.betors);
                                     }, error => {
                                         console.error(error);

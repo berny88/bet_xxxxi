@@ -19,7 +19,7 @@
                 <table class="table  table-striped table-hover">
                     <thead>
                         <tr>
-                            <th >Date</th>
+                            <th>Date</th>
                             <th>Team A</th>
                             <th>Result A</th>
                             <th>Team B</th>
@@ -51,6 +51,7 @@
                     <thead>
                         <tr>
                             <th>Rank</th>
+                            <th>Avatar</th>
                             <th>Nickname</th>
                             <th>nbPoints</th>
                         </tr>
@@ -58,6 +59,12 @@
                     <tbody id="v-for-object">
                         <tr v-for="p in globalRankings" :key="p.nickName">
                             <td > {{ p.rank }}</td>
+                            <td>
+                                <figure class="avatar avatar-xl" style="background-color: #5755d9;">
+                            <!-- /apiv1.0/users/<user_id>/avatar-->
+                                <img v-bind:src="p.imgurl" alt="">
+                                </figure>
+                            </td>
                             <td > {{ p.nickName }}</td>
                             <td > {{ p.cumul }}</td>
                         </tr>
@@ -105,6 +112,8 @@ export default {
                             this.rankings = result.data.rankings;
                             this.loading = false;
                             console.info("rankings", this.rankings)
+                               
+
                             }, error => {
                                 console.error(error);
                                 this.errormsg=error;
@@ -120,6 +129,9 @@ export default {
                             this.globalRankings = result.data.globalRankings;
                             this.loading = false;
                             console.info("globalRankings", this.globalRankings)
+                            for (let i = 0; i < this.globalRankings.length; i++) {
+                                this.globalRankings[i].imgurl = "/back/users/apiv1.0/users/" + this.globalRankings[i].uuid+"/avatar";
+                            }        
                             }, error => {
                                 console.error(error);
                                 this.errormsg=error;
