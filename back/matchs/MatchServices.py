@@ -335,7 +335,7 @@ class MatchsManager(DbManager):
                             from BETUSER u, BET b
                             where u.uuid=b.FK_USER
                             group by nickName
-                            order by 2 desc;"""
+                            order by 3 desc;"""
         cur = localdb.cursor()
         cur.execute(sql_global_ranking)
 
