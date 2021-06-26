@@ -40,10 +40,26 @@ def getRankings():
 @matchs_page.route('/apiv1.0/matchs/global_rankings', methods=['GET'])
 def getGlobalRankings():
     mgr = MatchsManager()
-    globalRankings=mgr.getGlobalRankings()
-    logger.info(">>{}".format(jsonify({'globalRankings': globalRankings}).data))
+    rankings=mgr.getRankings("")
+    logger.info(">>{}".format(jsonify({'globalRankings': rankings}).data))
 
-    return jsonify({'globalRankings': globalRankings})
+    return jsonify({'globalRankings': rankings})
+
+@matchs_page.route('/apiv1.0/matchs/final_rankings', methods=['GET'])
+def getFinalRankings():
+    mgr = MatchsManager()
+    rankings=mgr.getRankings("FIN")
+    logger.info(">>{}".format(jsonify({'finalRankings': rankings}).data))
+
+    return jsonify({'finalRankings': rankings})
+
+@matchs_page.route('/apiv1.0/matchs/groupe_rankings', methods=['GET'])
+def getGroupeRankings():
+    mgr = MatchsManager()
+    rankings=mgr.getRankings("GRP")
+    logger.info(">>{}".format(jsonify({'groupeRankings': rankings}).data))
+
+    return jsonify({'groupeRankings': rankings})
 
 
 @matchs_page.route('/apiv1.0/matchs', methods=['PUT'])
@@ -323,9 +339,11 @@ class MatchsManager(DbManager):
         return result
     
 
-    def getGlobalRankings(self):
+    def getRankings(self, phase):
         """
-        get the complete list of matchs
+        @phase : if empty = global
+        GRP = Groupe phase
+        FIN = Final phase
         """
         localdb = self.getDb()
 
@@ -334,10 +352,11 @@ class MatchsManager(DbManager):
         sql_global_ranking="""select u.uuid, u.nickName , sum(nbPoints) as cumul
                             from BETUSER u, BET b
                             where u.uuid=b.FK_USER
+                            and b.FK_GAME like '{}%'
                             group by nickName
                             order by 3 desc;"""
         cur = localdb.cursor()
-        cur.execute(sql_global_ranking)
+        cur.execute(sql_global_ranking.format(phase))
 
         rows = cur.fetchall()
         result = list()
@@ -345,7 +364,7 @@ class MatchsManager(DbManager):
         for row in rows:
             row["rank"]=i
             result.append(row)                    
-            logger.info("getGlobalRankings::bet_result={}".format(row))
+            logger.info("MatchServices::getRankings={}".format(row))
             i=i+1
         return result
 
